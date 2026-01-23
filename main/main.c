@@ -8,6 +8,12 @@
 
 #define TAG "main"
 
+void wifi_init_task(void *pvParameter) {
+    // 初始化 WiFi
+    wifi_init();
+    vTaskDelete(NULL);
+}
+
 void app_main(void) {
     // 初始化配置管理器
     esp_err_t ret = config_manager_init();
@@ -17,7 +23,7 @@ void app_main(void) {
     }
 
     // 初始化 WiFi
-    wifi_init();
+    xTaskCreate(wifi_init_task, "wifi_init_task", 4096, NULL, 5, NULL);
 
     // 初始化触摸屏
     touch_init();
