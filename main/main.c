@@ -1,5 +1,6 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
+#include "touch.h"
 #include <stdio.h>
 
 #include "config_manager.h"
@@ -17,6 +18,9 @@ void app_main(void) {
 
     // 初始化 WiFi
     wifi_init();
+
+    // 初始化触摸屏
+    touch_init();
 
     return;
 }
