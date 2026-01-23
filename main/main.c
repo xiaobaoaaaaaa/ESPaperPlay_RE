@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "config_manager.h"
+#include "wifi.h"
 
 #define TAG "main"
 
@@ -13,6 +14,9 @@ void app_main(void) {
         ESP_LOGE(TAG, "config_manager_init failed: %s", esp_err_to_name(ret));
         return;
     }
+
+    // 初始化 WiFi
+    wifi_init();
 
     return;
 }

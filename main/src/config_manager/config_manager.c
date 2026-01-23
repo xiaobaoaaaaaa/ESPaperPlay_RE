@@ -110,11 +110,9 @@ esp_err_t config_manager_save_config(sys_config_t *config) {
     return ESP_OK;
 }
 
-/**
- * @brief 获取当前系统配置
- * @return 指向 sys_config_t 结构体的指针
- */
-const sys_config_t *config_manager_get_config() { return &sys_config; }
+void config_manager_get_config(sys_config_t *config) {
+    memcpy(config, &sys_config, sizeof(sys_config_t));
+}
 
 /**
  * @brief 初始化配置管理器
