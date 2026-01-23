@@ -27,7 +27,7 @@ set(ALL_SRCS
 )
 
 idf_component_register(SRCS ${ALL_SRCS}
-                    REQUIRES nvs_flash esp_wifi driver
+                    REQUIRES nvs_flash esp_wifi driver esp_psram
                     INCLUDE_DIRS "."
                                  "./include"
 )
