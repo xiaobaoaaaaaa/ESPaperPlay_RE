@@ -13,9 +13,17 @@ dependencies:
     source:
       type: idf
     version: 5.5.1
+  lvgl/lvgl:
+    component_hash: 17e68bfd21f0edf4c3ee838e2273da840bf3930e5dbc3bfa6c1190c3aed41f9f
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 9.4.0
 direct_dependencies:
 - espressif/esp_lcd_ssd1681
 - idf
-manifest_hash: 1a5740a60965e5bedfaf65566c09f108e7b0f3e859b71cd8764e3949f6d02c97
+- lvgl/lvgl
+manifest_hash: 1222230c6bcc9941e5683aa29d5b8085609e0f1d14429b997ef14f2cfc57a117
 target: esp32s3
 version: 2.0.0
