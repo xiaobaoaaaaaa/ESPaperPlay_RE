@@ -15,8 +15,13 @@ set(TP_SRCS
     "src/hardware/touch_pad/i2c_ctp_ftxx06_xx36.c"
 )
 
+set(EPAPER_SRCS
+    "src/hardware/display/epaper.c"
+)
+
 set(HARDWARE_SRCS
     ${TP_SRCS}
+    ${EPAPER_SRCS}
 )
 
 set(ALL_SRCS 

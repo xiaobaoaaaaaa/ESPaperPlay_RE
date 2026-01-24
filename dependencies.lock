@@ -1,0 +1,21 @@
+dependencies:
+  espressif/esp_lcd_ssd1681:
+    component_hash: fd5cdcc8e7e748838f8923cedc624eb85c0edc7a82e83db0fc4ba87cb51d1c49
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.1.0~1
+  idf:
+    source:
+      type: idf
+    version: 5.5.1
+direct_dependencies:
+- espressif/esp_lcd_ssd1681
+- idf
+manifest_hash: 1a5740a60965e5bedfaf65566c09f108e7b0f3e859b71cd8764e3949f6d02c97
+target: esp32s3
+version: 2.0.0

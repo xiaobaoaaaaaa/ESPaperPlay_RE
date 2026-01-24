@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "config_manager.h"
+#include "epaper.h"
 #include "wifi.h"
 
 #define TAG "main"
@@ -27,6 +28,13 @@ void app_main(void) {
 
     // 初始化触摸屏
     touch_init();
+
+    // 初始化屏幕
+    ret = epaper_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "epaper_init failed: %s", esp_err_to_name(ret));
+        return;
+    }
 
     return;
 }
