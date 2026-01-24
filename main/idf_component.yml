@@ -14,5 +14,5 @@ dependencies:
   #   # `public` flag doesn't have an effect dependencies of the `main` component.
   #   # All dependencies of `main` are public by default.
   #   public: true
-  espressif/esp_lcd_ssd1681: ^0.1.0~1
+  # espressif/esp_lcd_ssd1681: ^0.1.0~1  # 已替换为自定义版本 components/esp_lcd_ssd1681_custom
   lvgl/lvgl: ^9.4.0

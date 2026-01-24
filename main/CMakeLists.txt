@@ -40,7 +40,7 @@ set(ALL_SRCS
 )
 
 idf_component_register(SRCS ${ALL_SRCS}
-                    REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer
+                    REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer esp_lcd_ssd1681_custom
                     INCLUDE_DIRS "."
                                  "./include"
 )
