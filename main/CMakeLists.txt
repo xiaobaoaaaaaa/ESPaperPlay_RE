@@ -21,6 +21,9 @@ set(EPAPER_SRCS
 
 set(LVGL_SRCS
     "src/lvgl/lvgl_init.c"
+    "src/lvgl/lv_port_disp.c"
+    "src/lvgl/lv_port_indev.c"
+    "src/lvgl/dither.c"
 )
 
 set(HARDWARE_SRCS

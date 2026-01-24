@@ -5,6 +5,7 @@
  */
 #pragma once
 
+// clang-format off
 
 // 0x00 ~ 0xff   blink 1 time ~ 256 times to refresh
 #define SSD1681_WAVESHARE_1IN54_REFRESH_TIME           0x01
