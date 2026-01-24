@@ -26,6 +26,12 @@ lv_display_t *lv_port_disp_get(void);
 uint8_t *lv_port_disp_get_fb(void);
 
 /**
+ * @brief 获取帧缓冲大小
+ * @return 帧缓冲大小（字节）
+ */
+size_t lv_port_disp_get_fb_size(void);
+
+/**
  * @brief 检查屏幕是否需要刷新
  * @return true 需要刷新，false 不需要
  */

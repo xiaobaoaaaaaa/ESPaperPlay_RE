@@ -11,7 +11,6 @@
 #include "esp_timer.h"
 
 #include "epaper.h"
-#include "ssd1681_waveshare_1in54_lut.h"
 
 #include "lv_demos.h"
 #include "lvgl.h"
@@ -36,7 +35,9 @@
 #define MY_DISP_VER_RES 200
 #endif
 
+// 局刷计数器和阈值
 static int fast_refresh_count = 0;
+#define MAX_PARTIAL_REFRESH_COUNT 10 // 每 10 次局刷后进行一次全刷
 
 // ============================================================================
 // 私有变量
@@ -68,19 +69,31 @@ static void lvgl_screen_refresh_task(void *param) {
         // 打开屏幕
         esp_lcd_panel_disp_on_off(s_panel_handle, true);
 
-        if (fast_refresh_count < 5) {
+        // 根据局刷计数决定刷新模式
+        if (fast_refresh_count < MAX_PARTIAL_REFRESH_COUNT) {
             fast_refresh_count++;
-            // 设置快速刷新 LUT
-            static uint8_t fast_refresh_lut[] = SSD1681_WAVESHARE_1IN54_V2_LUT_FAST_REFRESH_KEEP;
-            ESP_ERROR_CHECK(epaper_panel_set_custom_lut(s_panel_handle, fast_refresh_lut, 159));
+            // 使用内置 LUT 局刷模式
+            ESP_LOGI(TAG, "Partial refresh (%d/%d)", fast_refresh_count, MAX_PARTIAL_REFRESH_COUNT);
+            epaper_panel_set_refresh_mode(s_panel_handle, true); // 局刷
         } else {
             fast_refresh_count = 0;
+            // 使用全刷模式重置屏幕
+            ESP_LOGI(TAG, "Full refresh (reset screen)");
+            epaper_panel_set_refresh_mode(s_panel_handle, false); // 全刷
         }
+
+        uint8_t *virtual_fb = lv_port_disp_get_fb();
 
         // 发送黑色位图
         epaper_panel_set_bitmap_color(s_panel_handle, SSD1681_EPAPER_BITMAP_BLACK);
         esp_lcd_panel_draw_bitmap(s_panel_handle, 0, 0, MY_DISP_HOR_RES, MY_DISP_VER_RES,
-                                  lv_port_disp_get_fb());
+                                  virtual_fb);
+
+        // 发送红色位图（与黑色位图相同）
+        // SSD1681 使用内置 LUT 局刷时，需要同时写入两个 VRAM
+        epaper_panel_set_bitmap_color(s_panel_handle, SSD1681_EPAPER_BITMAP_RED);
+        esp_lcd_panel_draw_bitmap(s_panel_handle, 0, 0, MY_DISP_HOR_RES, MY_DISP_VER_RES,
+                                  virtual_fb);
 
         // 刷新并关闭屏幕
         epaper_panel_refresh_screen(s_panel_handle);

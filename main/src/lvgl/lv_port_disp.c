@@ -130,6 +130,8 @@ lv_display_t *lv_port_disp_get(void) { return disp; }
 
 uint8_t *lv_port_disp_get_fb(void) { return virtual_fb; }
 
+size_t lv_port_disp_get_fb_size(void) { return MY_DISP_HOR_RES * MY_DISP_VER_RES / 8; }
+
 bool lv_port_disp_needs_refresh(void) { return screen_needs_refresh; }
 
 void lv_port_disp_clear_refresh_flag(void) { screen_needs_refresh = false; }
