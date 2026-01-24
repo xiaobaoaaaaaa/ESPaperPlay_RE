@@ -19,6 +19,10 @@ set(EPAPER_SRCS
     "src/hardware/display/epaper.c"
 )
 
+set(LVGL_SRCS
+    "src/lvgl/lvgl_init.c"
+)
+
 set(HARDWARE_SRCS
     ${TP_SRCS}
     ${EPAPER_SRCS}
@@ -29,10 +33,11 @@ set(ALL_SRCS
     ${CONFIG_MANAGER_SRCS}
     ${WIFI_SRCS}
     ${HARDWARE_SRCS}
+    ${LVGL_SRCS}
 )
 
 idf_component_register(SRCS ${ALL_SRCS}
-                    REQUIRES nvs_flash esp_wifi driver esp_psram
+                    REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer
                     INCLUDE_DIRS "."
                                  "./include"
 )

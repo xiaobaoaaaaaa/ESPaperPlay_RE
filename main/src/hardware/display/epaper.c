@@ -1,9 +1,5 @@
 #include "driver/gpio.h"
 #include "driver/spi_common.h"
-#include "esp_lcd_panel_io.h"
-#include "esp_lcd_panel_ops.h"
-#include "esp_lcd_panel_ssd1681.h"
-#include "esp_lcd_panel_vendor.h"
 #include "esp_log.h"
 
 #include "epaper.h"

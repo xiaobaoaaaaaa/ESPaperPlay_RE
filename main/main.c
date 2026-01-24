@@ -5,6 +5,7 @@
 
 #include "config_manager.h"
 #include "epaper.h"
+#include "lvgl_init.h"
 #include "wifi.h"
 
 #define TAG "main"
@@ -26,15 +27,8 @@ void app_main(void) {
     // 初始化 WiFi
     xTaskCreate(wifi_init_task, "wifi_init_task", 4096, NULL, 5, NULL);
 
-    // 初始化触摸屏
-    touch_init();
-
-    // 初始化屏幕
-    ret = epaper_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "epaper_init failed: %s", esp_err_to_name(ret));
-        return;
-    }
+    // 初始化 LVGL
+    lvgl_init_epaper_display();
 
     return;
 }
