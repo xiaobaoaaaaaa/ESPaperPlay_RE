@@ -20,6 +20,9 @@
 // 当前抖动模式（硬编码配置，后续可改为从 NVS 读取）
 static dither_mode_t g_dither_mode = DITHER_MODE_STUCKI;
 
+// 记录禁用抖动前的模式，用于恢复
+static dither_mode_t g_last_dither_mode = DITHER_MODE_STUCKI;
+
 // 误差扩散抖动的误差缓冲区（按需分配）
 // Floyd-Steinberg 需要 2 行，Stucki 需要 3 行
 static int16_t *dither_error_lines[3] = {NULL, NULL, NULL};
@@ -79,6 +82,34 @@ static inline uint8_t lvgl_native_px_to_luma_u8(const uint8_t *px) {
 // ============================================================================
 // 抖动算法实现
 // ============================================================================
+
+/**
+ * @brief 简单阈值（无抖动）
+ */
+static void dither_threshold(const uint8_t *src, uint8_t *dst, int area_x1, int area_y1, int width,
+                             int height, int screen_width, int bytes_per_pixel) {
+    const int screen_bytes_per_row = screen_width / 8;
+
+    for (int row = 0; row < height; ++row) {
+        const uint8_t *src_row = src + row * width * bytes_per_pixel;
+        uint8_t *dst_row = dst + (area_y1 + row) * screen_bytes_per_row;
+
+        for (int x = 0; x < width; ++x) {
+            int dst_x = area_x1 + x;
+            const uint8_t *px = &src_row[x * bytes_per_pixel];
+            uint8_t luma = lvgl_native_px_to_luma_u8(px);
+            bool black = (luma < 128);
+
+            int dst_byte = dst_x / 8;
+            int dst_bit = 7 - (dst_x % 8);
+
+            if (black)
+                dst_row[dst_byte] |= (1 << dst_bit);
+            else
+                dst_row[dst_byte] &= ~(1 << dst_bit);
+        }
+    }
+}
 
 /**
  * @brief Bayer 8x8 有序抖动
@@ -329,15 +360,37 @@ void dither_set_mode(dither_mode_t mode) {
     if (mode != g_dither_mode) {
         dither_free_buffers();
         g_dither_mode = mode;
+        // 如果设置的是有效抖动模式，记录下来
+        if (mode != DITHER_MODE_NONE) {
+            g_last_dither_mode = mode;
+        }
         ESP_LOGI(TAG, "Dither mode changed to %d", mode);
     }
 }
 
 dither_mode_t dither_get_mode(void) { return g_dither_mode; }
 
+bool dither_is_enabled(void) { return g_dither_mode != DITHER_MODE_NONE; }
+
+void dither_set_enabled(bool enable) {
+    if (enable) {
+        // 恢复上次使用的抖动模式
+        if (g_dither_mode == DITHER_MODE_NONE) {
+            dither_set_mode(g_last_dither_mode);
+        }
+    } else {
+        // 禁用抖动
+        dither_set_mode(DITHER_MODE_NONE);
+    }
+}
+
 void dither_convert_area(const uint8_t *src, uint8_t *dst, int area_x1, int area_y1, int width,
                          int height, int screen_width, int bytes_per_pixel) {
     switch (g_dither_mode) {
+    case DITHER_MODE_NONE:
+        // 简单阈值，无抖动
+        dither_threshold(src, dst, area_x1, area_y1, width, height, screen_width, bytes_per_pixel);
+        break;
     case DITHER_MODE_BAYER:
         dither_bayer(src, dst, area_x1, area_y1, width, height, screen_width, bytes_per_pixel);
         break;
@@ -349,7 +402,7 @@ void dither_convert_area(const uint8_t *src, uint8_t *dst, int area_x1, int area
         dither_stucki(src, dst, area_x1, area_y1, width, height, screen_width, bytes_per_pixel);
         break;
     default:
-        dither_bayer(src, dst, area_x1, area_y1, width, height, screen_width, bytes_per_pixel);
+        dither_threshold(src, dst, area_x1, area_y1, width, height, screen_width, bytes_per_pixel);
         break;
     }
 }

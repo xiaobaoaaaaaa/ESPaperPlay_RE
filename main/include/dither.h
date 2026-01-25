@@ -11,10 +11,23 @@
  * @brief 抖动算法模式枚举
  */
 typedef enum {
-    DITHER_MODE_BAYER,           ///< Bayer 8x8 有序抖动 - 最快，无额外内存
+    DITHER_MODE_NONE,            ///< 禁用抖动 - 简单阈值，最快
+    DITHER_MODE_BAYER,           ///< Bayer 8x8 有序抖动 - 快速，无额外内存
     DITHER_MODE_FLOYD_STEINBERG, ///< Floyd-Steinberg 误差扩散 - 中等性能，效果好
     DITHER_MODE_STUCKI,          ///< Stucki 误差扩散 - 最慢，效果最好
 } dither_mode_t;
+
+/**
+ * @brief 检查抖动是否启用
+ * @return true 启用抖动，false 禁用抖动
+ */
+bool dither_is_enabled(void);
+
+/**
+ * @brief 启用或禁用抖动
+ * @param enable true 启用（使用上次设置的抖动模式），false 禁用（使用简单阈值）
+ */
+void dither_set_enabled(bool enable);
 
 /**
  * @brief 设置抖动模式
