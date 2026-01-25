@@ -21,6 +21,7 @@
 #include "lv_port_indev.h"
 #include "lvgl_init.h"
 #include "touch.h"
+#include "ui.h"
 
 #define TAG "lvgl_init"
 
@@ -38,6 +39,7 @@
 
 // 局刷计数器和阈值
 static int fast_refresh_count = 0;
+static int max_fast_refresh_count = 30;
 
 // ============================================================================
 // 私有变量
@@ -70,10 +72,10 @@ static void lvgl_screen_refresh_task(void *param) {
         esp_lcd_panel_disp_on_off(s_panel_handle, true);
 
         // 根据局刷计数决定刷新模式
-        if (fast_refresh_count < fast_refresh_count) {
+        if (fast_refresh_count < max_fast_refresh_count) {
             fast_refresh_count++;
             // 使用内置 LUT 局刷模式
-            ESP_LOGI(TAG, "Partial refresh (%d/%d)", fast_refresh_count, fast_refresh_count);
+            ESP_LOGI(TAG, "Partial refresh (%d/%d)", fast_refresh_count, max_fast_refresh_count);
             epaper_panel_set_refresh_mode(s_panel_handle, true); // 局刷
         } else {
             fast_refresh_count = 0;
@@ -111,6 +113,7 @@ static void lvgl_screen_refresh_task(void *param) {
 static void increase_lvgl_tick(void *arg) {
     xSemaphoreTake(lvgl_mutex, portMAX_DELAY);
     lv_tick_inc(LVGL_TICK_PERIOD_MS);
+    ui_tick();
     xSemaphoreGive(lvgl_mutex);
 }
 
@@ -144,7 +147,7 @@ void lvgl_init_epaper_display(void) {
     // 获取系统配置
     sys_config_t sys_config;
     config_manager_get_config(&sys_config);
-    fast_refresh_count = sys_config.display.fast_refresh_count;
+    max_fast_refresh_count = sys_config.display.fast_refresh_count;
     dither_set_mode(sys_config.display.dither_mode);
 
     // 初始化电子墨水屏硬件
@@ -174,8 +177,8 @@ void lvgl_init_epaper_display(void) {
     ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, LVGL_TICK_PERIOD_MS * 1000));
 
-    // 初始化 UI Demo
-    lv_demo_widgets();
+    // 初始化 UI
+    ui_init();
 
     // 创建 LVGL 定时器任务
     xTaskCreate(lvgl_timer_task, "lvgl_task", 8192, NULL, 10, NULL);

@@ -26,6 +26,13 @@ set(LVGL_SRCS
     "src/lvgl/dither.c"
 )
 
+set(UI_SRCS
+    "src/ui/images.c"
+    "src/ui/ui.c"
+    "src/ui/screens.c"
+    "src/ui/styles.c"
+)
+
 set(HARDWARE_SRCS
     ${TP_SRCS}
     ${EPAPER_SRCS}
@@ -37,10 +44,12 @@ set(ALL_SRCS
     ${WIFI_SRCS}
     ${HARDWARE_SRCS}
     ${LVGL_SRCS}
+    ${UI_SRCS}
 )
 
 idf_component_register(SRCS ${ALL_SRCS}
                     REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer esp_lcd_ssd1681_custom
                     INCLUDE_DIRS "."
                                  "./include"
+                                 "./src/ui"
 )
