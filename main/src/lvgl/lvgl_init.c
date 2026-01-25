@@ -169,16 +169,16 @@ void lvgl_init_epaper_display(void) {
     // 初始化输入设备
     lv_port_indev_init();
 
-    // 配置 LVGL 系统时钟定时器
+    // 初始化 UI（必须在启动 tick 定时器之前，否则 ui_tick() 会访问未初始化的屏幕）
+    ui_init();
+
+    // 配置 LVGL 系统时钟定时器（在 ui_init 之后启动，确保 currentScreen 已有效）
     ESP_LOGI(TAG, "Setting up LVGL tick timer");
     const esp_timer_create_args_t lvgl_tick_timer_args = {.callback = &increase_lvgl_tick,
                                                           .name = "lvgl_tick"};
     esp_timer_handle_t lvgl_tick_timer = NULL;
     ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, LVGL_TICK_PERIOD_MS * 1000));
-
-    // 初始化 UI
-    ui_init();
 
     // 创建 LVGL 定时器任务
     xTaskCreate(lvgl_timer_task, "lvgl_task", 8192, NULL, 10, NULL);

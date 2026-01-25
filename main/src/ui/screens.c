@@ -27,8 +27,9 @@ void create_screen_main() {
             lv_obj_set_pos(obj, 0, 0);
             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
             lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_label_set_text(obj, "Hello, world!");
+            lv_label_set_text(obj, "Hello, world! \n你好世界");
         }
     }
     
@@ -51,7 +52,16 @@ void tick_screen_by_id(enum ScreensEnum screenId) {
     tick_screen_funcs[screenId - 1]();
 }
 
+lv_font_t *ui_font_source_han_sans_sc_14;
+
 void create_screens() {
+    {
+        ui_font_source_han_sans_sc_14 = lv_freetype_font_create("/flash/hei.ttf", LV_FREETYPE_FONT_RENDER_MODE_BITMAP, 14, LV_FREETYPE_FONT_STYLE_NORMAL);
+        if (!ui_font_source_han_sans_sc_14) {
+            LV_LOG_ERROR("font create failed: ui_font_source_han_sans_sc_14");
+        }
+    }
+    
     lv_disp_t *dispp = lv_disp_get_default();
     lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
     lv_disp_set_theme(dispp, theme);

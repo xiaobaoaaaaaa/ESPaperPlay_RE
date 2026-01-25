@@ -16,3 +16,4 @@ dependencies:
   #   public: true
   # espressif/esp_lcd_ssd1681: ^0.1.0~1  # 已替换为自定义版本 components/esp_lcd_ssd1681_custom
   lvgl/lvgl: ^9.4.0
+  espressif/freetype: ^2.13.3~1

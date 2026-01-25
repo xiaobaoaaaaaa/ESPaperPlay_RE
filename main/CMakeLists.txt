@@ -48,8 +48,16 @@ set(ALL_SRCS
 )
 
 idf_component_register(SRCS ${ALL_SRCS}
-                    REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer esp_lcd_ssd1681_custom
+                    REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer esp_lcd_ssd1681_custom fatfs
                     INCLUDE_DIRS "."
                                  "./include"
                                  "./src/ui"
 )
+
+# set(image ../fatfs_image)
+
+# if(CONFIG_EXAMPLE_FATFS_MODE_READ_ONLY)
+#     fatfs_create_rawflash_image(storage ${image} FLASH_IN_PROJECT PRESERVE_TIME)
+# else()
+#     fatfs_create_spiflash_image(storage ${image} FLASH_IN_PROJECT PRESERVE_TIME)
+# endif()

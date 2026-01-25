@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 
+extern lv_font_t *ui_font_source_han_sans_sc_14;
 
 
 #ifdef __cplusplus
