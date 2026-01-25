@@ -48,11 +48,15 @@ set(ALL_SRCS
 )
 
 idf_component_register(SRCS ${ALL_SRCS}
-                    REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer esp_lcd_ssd1681_custom fatfs
+                    REQUIRES nvs_flash esp_wifi driver esp_psram esp_timer esp_lcd_ssd1681_custom 
+                            fatfs freetype_custom lvgl_custom lvgl_custom
                     INCLUDE_DIRS "."
                                  "./include"
                                  "./src/ui"
 )
+
+# 创建静态文件系统，用于在 SPI Flash 上存储 FATFS 文件系统镜像
+# 若需更新静态文件系统镜像，请取消以下代码的注释并重新编译项目
 
 # set(image ../fatfs_image)
 

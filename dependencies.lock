@@ -1,29 +1,10 @@
 dependencies:
-  espressif/freetype:
-    component_hash: cd5e2d8458e6e8d73f1120ac474467cabb669d8ea4b25050bf6a348c1e89225e
-    dependencies:
-    - name: idf
-      require: private
-      version: '>=4.4'
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 2.13.3~1
   idf:
     source:
       type: idf
     version: 5.5.1
-  lvgl/lvgl:
-    component_hash: 17e68bfd21f0edf4c3ee838e2273da840bf3930e5dbc3bfa6c1190c3aed41f9f
-    dependencies: []
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 9.4.0
 direct_dependencies:
-- espressif/freetype
 - idf
-- lvgl/lvgl
-manifest_hash: 4b792350fb2474d1eab1f940e33b6c609513d38d06a2157bc764011c05841c70
+manifest_hash: 1f2127f51e91677c42a9db9a419a0c95dca23e445f5d5e1b5d96ff085f461fee
 target: esp32s3
 version: 2.0.0
