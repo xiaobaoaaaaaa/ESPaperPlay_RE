@@ -61,6 +61,34 @@ esp_err_t sys_config_load(sys_config_t *config) {
         return err;
     }
 
+    required_size = sizeof(config->display.fast_refresh_count);
+    err = nvs_get_str(nvs_handle, "fast_refresh_count", (char *)&config->display.fast_refresh_count,
+                      &required_size);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Loaded fast_refresh_count: %d", config->display.fast_refresh_count);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "fast_refresh_count not found, using default");
+        config->display.fast_refresh_count = 30;
+    } else {
+        ESP_LOGI(TAG, "nvs_get_str for fast_refresh_count failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    required_size = sizeof(config->display.dither_mode);
+    err = nvs_get_str(nvs_handle, "dither_mode", (char *)&config->display.dither_mode,
+                      &required_size);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Loaded dither_mode: %d", config->display.dither_mode);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "dither_mode not found, using default");
+        config->display.dither_mode = DITHER_MODE_NONE;
+    } else {
+        ESP_LOGI(TAG, "nvs_get_str for dither_mode failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
     return ESP_OK;
 }
 
@@ -93,6 +121,21 @@ esp_err_t config_manager_save_config(sys_config_t *config) {
     err = nvs_set_str(nvs_handle, "wifi_password", config->wifi.password);
     if (err != ESP_OK) {
         ESP_LOGI(TAG, "nvs_set_str for wifi_password failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err =
+        nvs_set_str(nvs_handle, "fast_refresh_count", (char *)&config->display.fast_refresh_count);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "nvs_set_str for fast_refresh_count failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_set_str(nvs_handle, "dither_mode", (char *)&config->display.dither_mode);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "nvs_set_str for dither_mode failed: %s", esp_err_to_name(err));
         nvs_close(nvs_handle);
         return err;
     }

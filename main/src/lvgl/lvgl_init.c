@@ -15,6 +15,7 @@
 #include "lv_demos.h"
 #include "lvgl.h"
 
+#include "config_manager.h"
 #include "dither.h"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
@@ -37,7 +38,6 @@
 
 // 局刷计数器和阈值
 static int fast_refresh_count = 0;
-#define MAX_PARTIAL_REFRESH_COUNT 10 // 每 10 次局刷后进行一次全刷
 
 // ============================================================================
 // 私有变量
@@ -70,10 +70,10 @@ static void lvgl_screen_refresh_task(void *param) {
         esp_lcd_panel_disp_on_off(s_panel_handle, true);
 
         // 根据局刷计数决定刷新模式
-        if (fast_refresh_count < MAX_PARTIAL_REFRESH_COUNT) {
+        if (fast_refresh_count < fast_refresh_count) {
             fast_refresh_count++;
             // 使用内置 LUT 局刷模式
-            ESP_LOGI(TAG, "Partial refresh (%d/%d)", fast_refresh_count, MAX_PARTIAL_REFRESH_COUNT);
+            ESP_LOGI(TAG, "Partial refresh (%d/%d)", fast_refresh_count, fast_refresh_count);
             epaper_panel_set_refresh_mode(s_panel_handle, true); // 局刷
         } else {
             fast_refresh_count = 0;
@@ -140,6 +140,12 @@ void lvgl_init_epaper_display(void) {
 
     // 创建 LVGL 互斥锁
     lvgl_mutex = xSemaphoreCreateMutex();
+
+    // 获取系统配置
+    sys_config_t sys_config;
+    config_manager_get_config(&sys_config);
+    fast_refresh_count = sys_config.display.fast_refresh_count;
+    dither_set_mode(sys_config.display.dither_mode);
 
     // 初始化电子墨水屏硬件
     esp_err_t ret = epaper_init();
