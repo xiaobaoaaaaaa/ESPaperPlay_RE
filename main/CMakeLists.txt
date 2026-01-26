@@ -38,6 +38,10 @@ set(HARDWARE_SRCS
     ${EPAPER_SRCS}
 )
 
+set(SERVICES_SRCS
+    "src/services/sntp.c"
+)
+
 set(ALL_SRCS 
     ${MAIN_SRCS} 
     ${CONFIG_MANAGER_SRCS}
@@ -45,6 +49,7 @@ set(ALL_SRCS
     ${HARDWARE_SRCS}
     ${LVGL_SRCS}
     ${UI_SRCS}
+    ${SERVICES_SRCS}
 )
 
 idf_component_register(SRCS ${ALL_SRCS}

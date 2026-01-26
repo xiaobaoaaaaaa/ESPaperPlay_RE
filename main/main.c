@@ -7,15 +7,20 @@
 #include "config_manager.h"
 #include "epaper.h"
 #include "lvgl_init.h"
+#include "sntp.h"
 #include "wifi.h"
 
 #define TAG "main"
 
 static wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
 
-void wifi_init_task(void *pvParameter) {
+void wifi_and_time_init_task(void *pvParameter) {
     // 初始化 WiFi
     wifi_init();
+
+    // 初始化 SNTP 时间同步
+    time_init();
+
     vTaskDelete(NULL);
 }
 
@@ -40,7 +45,7 @@ void app_main(void) {
     }
 
     // 初始化 WiFi
-    xTaskCreate(wifi_init_task, "wifi_init_task", 4096, NULL, 5, NULL);
+    xTaskCreate(wifi_and_time_init_task, "wifi_init_task", 4096, NULL, 5, NULL);
 
     // 初始化 LVGL
     lvgl_init_epaper_display();
