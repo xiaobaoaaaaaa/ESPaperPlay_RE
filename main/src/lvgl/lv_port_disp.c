@@ -99,12 +99,13 @@ void lv_port_disp_init(void) {
     size_t lv_buf_size = (size_t)MY_DISP_HOR_RES * (size_t)MY_DISP_VER_RES * (size_t)BYTE_PER_PIXEL;
 
     // 分配缓冲区
-    buf1 = heap_caps_malloc(lv_buf_size, MALLOC_CAP_DMA);
-    buf2 = heap_caps_malloc(lv_buf_size, MALLOC_CAP_DMA);
+    buf1 = heap_caps_malloc(lv_buf_size, MALLOC_CAP_SPIRAM);
+    buf2 = heap_caps_malloc(lv_buf_size, MALLOC_CAP_SPIRAM);
     virtual_fb = heap_caps_malloc(virt_size, MALLOC_CAP_DMA);
 
     if (!buf1 || !buf2 || !virtual_fb) {
-        ESP_LOGE(TAG, "Display buffer allocation failed (buf1=%p virtual_fb=%p)", buf1, virtual_fb);
+        ESP_LOGE(TAG, "Display buffer allocation failed (buf1=%p buf2=%p virtual_fb=%p)", buf1,
+                 buf2, virtual_fb);
         if (buf1)
             heap_caps_free(buf1);
         if (buf2)

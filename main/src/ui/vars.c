@@ -27,3 +27,12 @@ void set_var_current_weekday(const char *value) {
     strncpy(current_weekday, value, sizeof(current_weekday) / sizeof(char));
     current_weekday[sizeof(current_weekday) / sizeof(char) - 1] = 0;
 }
+
+char yiyan[100] = {0};
+
+const char *get_var_yiyan() { return yiyan; }
+
+void set_var_yiyan(const char *value) {
+    strncpy(yiyan, value, sizeof(yiyan) / sizeof(char));
+    yiyan[sizeof(yiyan) / sizeof(char) - 1] = 0;
+}

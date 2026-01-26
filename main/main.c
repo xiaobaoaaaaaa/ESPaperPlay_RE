@@ -1,4 +1,5 @@
 #include "esp_log.h"
+#include "esp_system.h"
 #include "esp_vfs_fat.h"
 #include "nvs_flash.h"
 #include "touch.h"
@@ -28,6 +29,17 @@ void wifi_and_time_init_task(void *pvParameter) {
     vTaskDelete(NULL);
 }
 
+// 堆可用内存检测任务
+void heap_monitor_task(void *pvParameter) {
+    while (1) {
+        ESP_LOGI("MEM", "free internal=%d, largest internal=%d, free psram=%d",
+                 heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
+                 heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL),
+                 heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+        vTaskDelay(pdMS_TO_TICKS(10000)); // 每10秒打印一次
+    }
+}
+
 void app_main(void) {
     // 初始化 FATFS
     esp_vfs_fat_mount_config_t mount_config = {.format_if_mount_failed = true,
@@ -53,6 +65,8 @@ void app_main(void) {
 
     // 初始化 LVGL
     lvgl_init_epaper_display();
+
+    xTaskCreate(heap_monitor_task, "heap_monitor_task", 4096, NULL, 5, NULL);
 
     return;
 }
