@@ -8,13 +8,18 @@
 #include "config_manager.h"
 #include "date_update.h"
 #include "epaper.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
+#include "freertos/task.h"
 #include "lvgl_init.h"
 #include "sntp.h"
 #include "wifi.h"
 
 #define TAG "main"
+#define INIT_DONE_BIT BIT0
 
 static wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
+static EventGroupHandle_t s_init_event_group = NULL;
 
 void wifi_and_time_init_task(void *pvParameter) {
     // 初始化 WiFi
@@ -26,18 +31,10 @@ void wifi_and_time_init_task(void *pvParameter) {
     // 初始化日期更新时间服务
     date_update_init();
 
-    vTaskDelete(NULL);
-}
+    // 通知主任务网络与时间初始化已完成
+    xEventGroupSetBits(s_init_event_group, INIT_DONE_BIT);
 
-// 堆可用内存检测任务
-void heap_monitor_task(void *pvParameter) {
-    while (1) {
-        ESP_LOGI("MEM", "free internal=%d, largest internal=%d, free psram=%d",
-                 heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
-                 heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL),
-                 heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
-        vTaskDelay(pdMS_TO_TICKS(10000)); // 每10秒打印一次
-    }
+    vTaskDelete(NULL);
 }
 
 void app_main(void) {
@@ -60,13 +57,26 @@ void app_main(void) {
         return;
     }
 
-    // 初始化 WiFi
-    xTaskCreate(wifi_and_time_init_task, "wifi_init_task", 4096, NULL, 5, NULL);
+    s_init_event_group = xEventGroupCreate();
+    if (s_init_event_group == NULL) {
+        ESP_LOGE(TAG, "Failed to create init event group");
+        return;
+    }
+
+    // 初始化 WiFi/时间（异步任务，完成后通过事件组通知）
+    BaseType_t task_created =
+        xTaskCreate(wifi_and_time_init_task, "wifi_init_task", 4096, NULL, 5, NULL);
+    if (task_created != pdPASS) {
+        ESP_LOGE(TAG, "Failed to create wifi/time init task");
+        return;
+    }
+
+    // 等待网络与时间初始化完成后再初始化 LVGL
+    xEventGroupWaitBits(s_init_event_group, INIT_DONE_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
+    ESP_LOGI(TAG, "Network/time init done, starting LVGL");
 
     // 初始化 LVGL
     lvgl_init_epaper_display();
-
-    xTaskCreate(heap_monitor_task, "heap_monitor_task", 4096, NULL, 5, NULL);
 
     return;
 }
