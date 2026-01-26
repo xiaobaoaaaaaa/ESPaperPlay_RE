@@ -1,5 +1,4 @@
-#ifndef __I2C_CONFIG_H__
-#define __I2C_CONFIG_H__
+#pragma once
 
 #include "driver/i2c.h"
 
@@ -144,5 +143,3 @@ esp_err_t i2c_master_write_slave(i2c_port_t i2c_num, uint8_t slave_addr, uint8_t
  */
 esp_err_t i2c_master_write_slave_reg(i2c_port_t i2c_num, uint8_t slave_addr, uint8_t reg_addr,
                                      uint8_t *data_wr, size_t size, TickType_t ticks_to_wait);
-
-#endif

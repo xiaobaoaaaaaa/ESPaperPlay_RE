@@ -1,8 +1,5 @@
-#ifndef _SNTP_H
-#define _SNTP_H
+#pragma once
 
 void obtain_time(void);
 
 void time_init(void);
-
-#endif

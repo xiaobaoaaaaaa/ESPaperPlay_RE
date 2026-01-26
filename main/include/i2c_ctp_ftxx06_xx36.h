@@ -1,5 +1,4 @@
-#ifndef __I2C_CTP_FTXX06_XX36_H__
-#define __I2C_CTP_FTXX06_XX36_H__
+#pragma once
 
 #include "esp_log.h"
 #include "i2c_config.h"
@@ -62,5 +61,3 @@ void i2c_ctp_FTxxxx_init(i2c_port_t i2c_num);
  *     - none
  */
 void i2c_ctp_FTxxxx_read_all(i2c_port_t i2c_num, ctp_tp_t *ctp);
-
-#endif

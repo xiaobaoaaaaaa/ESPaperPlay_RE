@@ -20,6 +20,12 @@ enum FlowGlobalVariables {
 
 // Native global variables
 
+extern const char *get_var_current_time();
+extern void set_var_current_time(const char *value);
+extern const char *get_var_current_date();
+extern void set_var_current_date(const char *value);
+extern const char *get_var_current_weekday();
+extern void set_var_current_weekday(const char *value);
 
 
 #ifdef __cplusplus

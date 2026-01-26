@@ -26,12 +26,10 @@ set(LVGL_SRCS
     "src/lvgl/dither.c"
 )
 
-set(UI_SRCS
-    "src/ui/images.c"
-    "src/ui/ui.c"
-    "src/ui/screens.c"
-    "src/ui/styles.c"
-)
+# UI文件 (EEZ Studio生成)
+file(GLOB UI_CPP_FILES "src/ui/*.cpp")
+file(GLOB UI_C_FILES "src/ui/*.c")
+file(GLOB UI_IMG_FILES "src/ui/images/*.c")
 
 set(HARDWARE_SRCS
     ${TP_SRCS}
@@ -40,6 +38,7 @@ set(HARDWARE_SRCS
 
 set(SERVICES_SRCS
     "src/services/sntp.c"
+    "src/services/date_update.c"
 )
 
 set(ALL_SRCS 
@@ -48,8 +47,10 @@ set(ALL_SRCS
     ${WIFI_SRCS}
     ${HARDWARE_SRCS}
     ${LVGL_SRCS}
-    ${UI_SRCS}
     ${SERVICES_SRCS}
+    ${UI_IMG_FILES}
+    ${UI_CPP_FILES}
+    ${UI_C_FILES}
 )
 
 idf_component_register(SRCS ${ALL_SRCS}

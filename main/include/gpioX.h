@@ -1,5 +1,4 @@
-#ifndef __GPIOX_H__
-#define __GPIOX_H__
+#pragma once
 
 #include "driver/gpio.h"
 
@@ -54,5 +53,3 @@ void gpiox_set_input(uint32_t gpio_num, uint32_t pullup_en, uint32_t pulldown_en
  */
 void gpiox_set_intr_input(uint32_t gpio_num, uint32_t pullup_en, uint32_t pulldown_en,
                           uint32_t intr_type, void *isr_handler);
-
-#endif

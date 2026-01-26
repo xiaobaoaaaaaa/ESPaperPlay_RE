@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "config_manager.h"
+#include "date_update.h"
 #include "epaper.h"
 #include "lvgl_init.h"
 #include "sntp.h"
@@ -20,6 +21,9 @@ void wifi_and_time_init_task(void *pvParameter) {
 
     // 初始化 SNTP 时间同步
     time_init();
+
+    // 初始化日期更新时间服务
+    date_update_init();
 
     vTaskDelete(NULL);
 }
