@@ -1,5 +1,6 @@
 #include "cJSON.h"
 #include "esp_crt_bundle.h"
+#include "esp_heap_caps.h"
 #include "esp_http_client.h"
 #include "esp_log.h"
 #include "esp_wifi.h"
@@ -12,9 +13,6 @@
 #include "yiyan.h"
 
 #define TAG "yiyan"
-
-// 一言响应缓冲区大小（一言API返回的JSON通常不超过1KB）
-#define YIYAN_RESPONSE_BUF_SIZE 2048
 
 // 解析一言内容
 static void parse_yiyan(const char *response, char **result) {
@@ -37,42 +35,47 @@ static void parse_yiyan(const char *response, char **result) {
     cJSON_Delete(json);
 }
 
-// 响应缓冲区结构体
-typedef struct {
-    char *buffer;
-    int len;
-    int max_len;
-} response_buffer_t;
-
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
-    response_buffer_t *resp_buf = (response_buffer_t *)evt->user_data;
+    static char *response_buf = NULL;
+    static int total_len = 0;
 
     switch (evt->event_id) {
     case HTTP_EVENT_ON_HEADER:
-        // 重置缓冲区
-        if (resp_buf && resp_buf->buffer) {
-            resp_buf->len = 0;
-            resp_buf->buffer[0] = '\0';
-        }
+        total_len = 0;
+        heap_caps_free(response_buf); // 清理上一次的
+        response_buf = NULL;
         break;
 
     case HTTP_EVENT_ON_DATA:
-        if (resp_buf && resp_buf->buffer) {
-            // 检查是否有足够空间
-            if (resp_buf->len + evt->data_len < resp_buf->max_len) {
-                memcpy(resp_buf->buffer + resp_buf->len, evt->data, evt->data_len);
-                resp_buf->len += evt->data_len;
-                resp_buf->buffer[resp_buf->len] = '\0'; // null 终止
-            } else {
-                ESP_LOGE(TAG, "Response buffer overflow, data truncated");
+        if (!esp_http_client_is_chunked_response(evt->client)) {
+            response_buf =
+                heap_caps_realloc(response_buf, total_len + evt->data_len + 1, MALLOC_CAP_SPIRAM);
+            if (response_buf == NULL) {
+                ESP_LOGE(TAG, "Failed to allocate response buffer");
+                total_len = 0;
+                return ESP_ERR_NO_MEM;
             }
+            memcpy(response_buf + total_len, evt->data, evt->data_len);
+            total_len += evt->data_len;
+            response_buf[total_len] = '\0'; // null 终止
         }
         break;
 
     case HTTP_EVENT_ON_FINISH:
+        if (response_buf) {
+            // 传给解析函数
+            *(char **)evt->user_data = strdup(response_buf);
+            heap_caps_free(response_buf);
+            response_buf = NULL;
+            total_len = 0;
+        }
+        break;
+
     case HTTP_EVENT_ERROR:
     case HTTP_EVENT_DISCONNECTED:
-        // 无需特殊处理，缓冲区由调用者管理
+        heap_caps_free(response_buf);
+        response_buf = NULL;
+        total_len = 0;
         break;
 
     default:
@@ -85,27 +88,14 @@ static esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
 esp_err_t get_yiyan(char **return_str) {
     *return_str = NULL;
 
-    // 分配响应缓冲区
-    char *response_buffer = heap_caps_malloc(YIYAN_RESPONSE_BUF_SIZE, MALLOC_CAP_SPIRAM);
-    if (response_buffer == NULL) {
-        ESP_LOGE(TAG, "Failed to allocate response buffer");
-        return ESP_ERR_NO_MEM;
-    }
-    response_buffer[0] = '\0';
-
-    // 初始化响应缓冲区结构
-    response_buffer_t resp_buf = {
-        .buffer = response_buffer,
-        .len = 0,
-        .max_len = YIYAN_RESPONSE_BUF_SIZE,
-    };
+    char *response_data = NULL;
 
     // 建立 HTTP 客户端配置
     esp_http_client_config_t config = {
         .url = "https://v1.hitokoto.cn/",
         .event_handler = _http_event_handler,
         .crt_bundle_attach = esp_crt_bundle_attach,
-        .user_data = &resp_buf,
+        .user_data = &response_data,
     };
 
     esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -120,16 +110,16 @@ esp_err_t get_yiyan(char **return_str) {
     } else {
         ESP_LOGE(TAG, "HTTP request failed: %s", esp_err_to_name(err));
         esp_http_client_cleanup(client);
-        free(response_buffer);
         return err;
     }
 
     esp_http_client_cleanup(client);
 
-    if (resp_buf.len > 0) {
-        parse_yiyan(response_buffer, return_str);
+    // 解析响应数据并返回一言字符串
+    if (response_data != NULL) {
+        parse_yiyan(response_data, return_str);
+        free(response_data);
     }
 
-    free(response_buffer);
     return ESP_OK;
 }
