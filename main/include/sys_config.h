@@ -16,4 +16,9 @@ typedef struct {
         dither_mode_t dither_mode;
     } display;
 
+    struct {
+        char id[32];
+        char key[32];
+    } ip_location;
+
 } sys_config_t;

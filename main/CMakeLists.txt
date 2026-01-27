@@ -40,6 +40,7 @@ set(SERVICES_SRCS
     "src/services/sntp.c"
     "src/services/date_update.c"
     "src/services/yiyan.c"
+    "src/services/ip_location.c"
 )
 
 set(ALL_SRCS 

@@ -89,6 +89,32 @@ esp_err_t sys_config_load(sys_config_t *config) {
         return err;
     }
 
+    required_size = sizeof(config->ip_location.id);
+    err = nvs_get_str(nvs_handle, "ip_location_id", config->ip_location.id, &required_size);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Loaded ip_location_id: %s", config->ip_location.id);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "ip_location_id not found, using default");
+        snprintf(config->ip_location.id, sizeof(config->ip_location.id), "88888888");
+    } else {
+        ESP_LOGI(TAG, "nvs_get_str for ip_location_id failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    required_size = sizeof(config->ip_location.key);
+    err = nvs_get_str(nvs_handle, "ip_location_key", config->ip_location.key, &required_size);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Loaded ip_location_key: %s", config->ip_location.key);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "ip_location_key not found, using default");
+        snprintf(config->ip_location.key, sizeof(config->ip_location.key), "88888888");
+    } else {
+        ESP_LOGI(TAG, "nvs_get_str for ip_location_key failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
     return ESP_OK;
 }
 
@@ -136,6 +162,20 @@ esp_err_t config_manager_save_config(sys_config_t *config) {
     err = nvs_set_str(nvs_handle, "dither_mode", (char *)&config->display.dither_mode);
     if (err != ESP_OK) {
         ESP_LOGI(TAG, "nvs_set_str for dither_mode failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_set_str(nvs_handle, "ip_location_id", config->ip_location.id);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "nvs_set_str for ip_location_id failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_set_str(nvs_handle, "ip_location_key", config->ip_location.key);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "nvs_set_str for ip_location_key failed: %s", esp_err_to_name(err));
         nvs_close(nvs_handle);
         return err;
     }
