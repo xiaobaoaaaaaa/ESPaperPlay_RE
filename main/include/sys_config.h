@@ -21,4 +21,10 @@ typedef struct {
         char key[64];
     } ip_location;
 
+    struct {
+        char city[64];
+        char api_host[128];
+        char api_key[64];
+    } weather;
+
 } sys_config_t;

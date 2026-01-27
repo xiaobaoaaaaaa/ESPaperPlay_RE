@@ -127,6 +127,7 @@ static esp_err_t config_get_handler(httpd_req_t *req) {
     cJSON *wifi = cJSON_CreateObject();
     cJSON *display = cJSON_CreateObject();
     cJSON *ip_location = cJSON_CreateObject();
+    cJSON *weather = cJSON_CreateObject();
 
     cJSON_AddStringToObject(root, "device_name", cfg.device_name);
 
@@ -141,6 +142,11 @@ static esp_err_t config_get_handler(httpd_req_t *req) {
     cJSON_AddStringToObject(ip_location, "id", cfg.ip_location.id);
     cJSON_AddStringToObject(ip_location, "key", cfg.ip_location.key);
     cJSON_AddItemToObject(root, "ip_location", ip_location);
+
+    cJSON_AddStringToObject(weather, "city", cfg.weather.city);
+    cJSON_AddStringToObject(weather, "api_host", cfg.weather.api_host);
+    cJSON_AddStringToObject(weather, "api_key", cfg.weather.api_key);
+    cJSON_AddItemToObject(root, "weather", weather);
 
     char *json_str = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
@@ -213,6 +219,16 @@ static esp_err_t config_post_handler(httpd_req_t *req) {
                           cJSON_GetObjectItemCaseSensitive(ip_location, "id"));
         copy_string_field(cfg.ip_location.key, sizeof(cfg.ip_location.key),
                           cJSON_GetObjectItemCaseSensitive(ip_location, "key"));
+    }
+
+    cJSON *weather = cJSON_GetObjectItemCaseSensitive(root, "weather");
+    if (cJSON_IsObject(weather)) {
+        copy_string_field(cfg.weather.city, sizeof(cfg.weather.city),
+                          cJSON_GetObjectItemCaseSensitive(weather, "city"));
+        copy_string_field(cfg.weather.api_host, sizeof(cfg.weather.api_host),
+                          cJSON_GetObjectItemCaseSensitive(weather, "api_host"));
+        copy_string_field(cfg.weather.api_key, sizeof(cfg.weather.api_key),
+                          cJSON_GetObjectItemCaseSensitive(weather, "api_key"));
     }
 
     cJSON_Delete(root);

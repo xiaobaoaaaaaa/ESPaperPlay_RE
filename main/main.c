@@ -14,6 +14,7 @@
 #include "ip_location.h"
 #include "lvgl_init.h"
 #include "sntp.h"
+#include "weather.h"
 #include "webserver.h"
 #include "wifi.h"
 
@@ -48,7 +49,23 @@ void get_location_task(void *pvParameter) {
     } else {
         ESP_LOGI(TAG, "IP Location: %s", location->message);
     }
+
+    // 使用获取到的位置查询当前天气
+    weather_now_t *weather = heap_caps_malloc(sizeof(weather_now_t), MALLOC_CAP_SPIRAM);
+    err = get_weather_now(location, weather);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "get_weather_now failed: %s", esp_err_to_name(err));
+    } else {
+        ESP_LOGI(TAG, "Current weather: %.1f°C, %s", weather->temperature, weather->text);
+    }
+
     heap_caps_free(location);
+    heap_caps_free(weather);
+    vTaskDelete(NULL);
+}
+
+void lvgl_init_task(void *param) {
+    lvgl_init_epaper_display();
     vTaskDelete(NULL);
 }
 
@@ -58,7 +75,8 @@ void app_main(void) {
                                                .max_files = 5,
                                                .allocation_unit_size = CONFIG_WL_SECTOR_SIZE};
     // 2. 执行挂载
-    esp_err_t err = esp_vfs_fat_spiflash_mount("/flash", "storage", &mount_config, &s_wl_handle);
+    esp_err_t err =
+        esp_vfs_fat_spiflash_mount_rw_wl("/flash", "storage", &mount_config, &s_wl_handle);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "挂载FATFS失败 (%s)", esp_err_to_name(err));
         return;
@@ -97,7 +115,7 @@ void app_main(void) {
     }
 
     // 初始化 LVGL
-    lvgl_init_epaper_display();
+    xTaskCreate(lvgl_init_task, "lvgl_init_task", 8192, NULL, 5, NULL);
 
     xTaskCreate(get_location_task, "get_location_task", 8192, NULL, 5, NULL);
 

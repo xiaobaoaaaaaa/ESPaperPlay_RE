@@ -48,13 +48,16 @@ static esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
 
     case HTTP_EVENT_ON_DATA:
         if (!esp_http_client_is_chunked_response(evt->client)) {
-            response_buf =
+            char *new_buf =
                 heap_caps_realloc(response_buf, total_len + evt->data_len + 1, MALLOC_CAP_SPIRAM);
-            if (response_buf == NULL) {
+            if (new_buf == NULL) {
                 ESP_LOGE(TAG, "Failed to allocate response buffer");
+                heap_caps_free(response_buf); // 释放已有的旧缓冲区
+                response_buf = NULL;
                 total_len = 0;
                 return ESP_ERR_NO_MEM;
             }
+            response_buf = new_buf;
             memcpy(response_buf + total_len, evt->data, evt->data_len);
             total_len += evt->data_len;
             response_buf[total_len] = '\0'; // null 终止
@@ -63,8 +66,12 @@ static esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
 
     case HTTP_EVENT_ON_FINISH:
         if (response_buf) {
-            // 传给解析函数
-            *(char **)evt->user_data = strdup(response_buf);
+            // 传给解析函数，使用 heap_caps_malloc 保持内存分配一致
+            *(char **)evt->user_data = heap_caps_malloc(total_len + 1, MALLOC_CAP_SPIRAM);
+            if (*(char **)evt->user_data != NULL) {
+                memcpy(*(char **)evt->user_data, response_buf, total_len);
+                (*(char **)evt->user_data)[total_len] = '\0';
+            }
             heap_caps_free(response_buf);
             response_buf = NULL;
             total_len = 0;
@@ -110,6 +117,11 @@ esp_err_t get_yiyan(char **return_str) {
     } else {
         ESP_LOGE(TAG, "HTTP request failed: %s", esp_err_to_name(err));
         esp_http_client_cleanup(client);
+        // 清理错误路径上可能分配的内存
+        if (response_data != NULL) {
+            heap_caps_free(response_data);
+            response_data = NULL;
+        }
         return err;
     }
 
@@ -118,7 +130,7 @@ esp_err_t get_yiyan(char **return_str) {
     // 解析响应数据并返回一言字符串
     if (response_data != NULL) {
         parse_yiyan(response_data, return_str);
-        free(response_data);
+        heap_caps_free(response_data); // 使用 heap_caps_free 与分配方式对应
     }
 
     return ESP_OK;

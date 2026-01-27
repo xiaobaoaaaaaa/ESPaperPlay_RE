@@ -1,10 +1,21 @@
 dependencies:
+  espressif/zlib:
+    component_hash: d901723af51f13fc8e5824f39f32239c847956e8fd951a05266588dc5cfbb9ae
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.4'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.3.1
   idf:
     source:
       type: idf
     version: 5.5.1
 direct_dependencies:
+- espressif/zlib
 - idf
-manifest_hash: 1f2127f51e91677c42a9db9a419a0c95dca23e445f5d5e1b5d96ff085f461fee
+manifest_hash: e95feeb0096950f3d6738c1ec2ed50ec2223de5c6bc631a1adc36f6310fdc0fa
 target: esp32s3
 version: 2.0.0

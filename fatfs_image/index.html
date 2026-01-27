@@ -60,11 +60,37 @@
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         }
 
+        .section {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .section h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            letter-spacing: 0.3px;
+        }
+
+        .section p {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
         label {
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
             letter-spacing: 0.2px;
+        }
+
+        .field-hint {
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.4;
         }
 
         input,
@@ -129,39 +155,79 @@
         <h1>ESPaperPlay 配置</h1>
         <p>在此更新 Wi-Fi 与设备参数，保存后立即写入设备。</p>
 
-        <div class="grid">
-            <div>
-                <label for="device_name">设备名称</label>
-                <input id="device_name" maxlength="31" />
+        <div class="section">
+            <h2>设备</h2>
+            <p>基础设备信息与显示刷新参数。</p>
+            <div class="grid">
+                <div>
+                    <label for="device_name">设备名称</label>
+                    <input id="device_name" maxlength="31" />
+                    <div class="field-hint">用于识别和管理设备</div>
+                </div>
+                <div>
+                    <label for="fast_refresh_count">快速刷新次数</label>
+                    <input id="fast_refresh_count" type="number" min="1" max="200" />
+                    <div class="field-hint">连续快刷次数,之后执行完全刷新清残影</div>
+                </div>
+                <div>
+                    <label for="dither_mode">抖动模式</label>
+                    <select id="dither_mode">
+                        <option value="0">无</option>
+                        <option value="1">有序抖动</option>
+                        <option value="2">Floyd-Steinberg</option>
+                        <option value="3">Stucki</option>
+                    </select>
+                    <div class="field-hint">图像抖动算法,改善灰度显示效果</div>
+                </div>
             </div>
-            <div>
-                <label for="fast_refresh_count">快速刷新次数</label>
-                <input id="fast_refresh_count" type="number" min="1" max="200" />
+        </div>
+
+        <div class="section" style="margin-top: 16px;">
+            <h2>网络</h2>
+            <p>Wi-Fi 连接与 IP 定位凭据。</p>
+            <div class="grid">
+                <div>
+                    <label for="wifi_ssid">Wi-Fi SSID</label>
+                    <input id="wifi_ssid" maxlength="32" />
+                    <div class="field-hint">设备连接的无线网络名称</div>
+                </div>
+                <div>
+                    <label for="wifi_password">Wi-Fi 密码</label>
+                    <input id="wifi_password" type="password" maxlength="64" />
+                    <div class="field-hint">无线网络密码,保存时明文存储</div>
+                </div>
+                <div>
+                    <label for="ip_id">IP 定位 ID</label>
+                    <input id="ip_id" maxlength="63" />
+                    <div class="field-hint">IP定位服务账号ID</div>
+                </div>
+                <div>
+                    <label for="ip_key">IP 定位 Key</label>
+                    <input id="ip_key" maxlength="63" />
+                    <div class="field-hint">IP定位服务密钥</div>
+                </div>
             </div>
-            <div>
-                <label for="dither_mode">抖动模式</label>
-                <select id="dither_mode">
-                    <option value="0">无</option>
-                    <option value="1">有序抖动</option>
-                    <option value="2">Floyd-Steinberg</option>
-                    <option value="3">Stucki</option>
-                </select>
-            </div>
-            <div>
-                <label for="wifi_ssid">Wi-Fi SSID</label>
-                <input id="wifi_ssid" maxlength="32" />
-            </div>
-            <div>
-                <label for="wifi_password">Wi-Fi 密码</label>
-                <input id="wifi_password" type="password" maxlength="64" />
-            </div>
-            <div>
-                <label for="ip_id">IP 定位 ID</label>
-                <input id="ip_id" maxlength="63" />
-            </div>
-            <div>
-                <label for="ip_key">IP 定位 Key</label>
-                <input id="ip_key" maxlength="63" />
+        </div>
+
+        <div class="section" style="margin-top: 16px;">
+            <h2>天气</h2>
+            <p>天气接口相关配置。</p>
+            <div class="grid">
+                <div>
+                    <label for="weather_city">城市名称</label>
+                    <input id="weather_city" maxlength="63" placeholder="留空使用 IP 定位" />
+                    <div class="field-hint">留空时自动根据IP定位获取天气</div>
+                </div>
+                <div>
+                    <label for="weather_host">API Host</label>
+                    <input id="weather_host" maxlength="127" />
+                    <div class="field-hint">天气服务的API域名或地址</div>
+                </div>
+                <div>
+                    <label for="weather_key">API Key</label>
+                    <input id="weather_key" maxlength="63" />
+                    <div class="field-hint">天气服务的API密钥</div>
+                </div>
             </div>
         </div>
 
@@ -186,6 +252,9 @@
                 el('dither_mode').value = data.display?.dither_mode ?? 0;
                 el('ip_id').value = data.ip_location?.id || '';
                 el('ip_key').value = data.ip_location?.key || '';
+                el('weather_city').value = data.weather?.city || '';
+                el('weather_host').value = data.weather?.api_host || '';
+                el('weather_key').value = data.weather?.api_key || '';
                 statusEl.textContent = '已加载当前配置';
             } catch (err) {
                 statusEl.textContent = '加载失败: ' + err;
@@ -207,6 +276,11 @@
                 ip_location: {
                     id: el('ip_id').value.trim(),
                     key: el('ip_key').value.trim(),
+                },
+                weather: {
+                    city: el('weather_city').value.trim(),
+                    api_host: el('weather_host').value.trim(),
+                    api_key: el('weather_key').value.trim(),
                 },
             };
 

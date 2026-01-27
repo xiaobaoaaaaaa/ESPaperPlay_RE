@@ -133,6 +133,45 @@ esp_err_t sys_config_load(sys_config_t *config) {
         return err;
     }
 
+    required_size = sizeof(config->weather.city);
+    err = nvs_get_str(nvs_handle, "weather_city", config->weather.city, &required_size);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Loaded weather_city: %s", config->weather.city);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "weather_city not found, using default");
+        config->weather.city[0] = '\0';
+    } else {
+        ESP_LOGI(TAG, "nvs_get_str for weather_city failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    required_size = sizeof(config->weather.api_host);
+    err = nvs_get_str(nvs_handle, "weather_host", config->weather.api_host, &required_size);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Loaded weather_host: %s", config->weather.api_host);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "weather_host not found, using default");
+        config->weather.api_host[0] = '\0';
+    } else {
+        ESP_LOGI(TAG, "nvs_get_str for weather_host failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    required_size = sizeof(config->weather.api_key);
+    err = nvs_get_str(nvs_handle, "weather_key", config->weather.api_key, &required_size);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "Loaded weather_key: %s", config->weather.api_key);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGI(TAG, "weather_key not found, using default");
+        config->weather.api_key[0] = '\0';
+    } else {
+        ESP_LOGI(TAG, "nvs_get_str for weather_key failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
     return ESP_OK;
 }
 
@@ -194,6 +233,27 @@ esp_err_t config_manager_save_config(sys_config_t *config) {
     err = nvs_set_str(nvs_handle, "ip_location_key", config->ip_location.key);
     if (err != ESP_OK) {
         ESP_LOGI(TAG, "nvs_set_str for ip_location_key failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_set_str(nvs_handle, "weather_city", config->weather.city);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "nvs_set_str for weather_city failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_set_str(nvs_handle, "weather_host", config->weather.api_host);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "nvs_set_str for weather_host failed: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_set_str(nvs_handle, "weather_key", config->weather.api_key);
+    if (err != ESP_OK) {
+        ESP_LOGI(TAG, "nvs_set_str for weather_key failed: %s", esp_err_to_name(err));
         nvs_close(nvs_handle);
         return err;
     }

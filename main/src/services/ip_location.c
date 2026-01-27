@@ -4,6 +4,7 @@
 #include "esp_heap_caps.h"
 #include "esp_http_client.h"
 #include "esp_log.h"
+#include <stdlib.h>
 #include <string.h>
 
 #include "config_manager.h"
@@ -60,8 +61,14 @@ static void parse_location(const char *json, location_t *location) {
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "shengcode");
-    if (item != NULL && cJSON_IsString(item) && item->valuestring) {
-        strncpy(location->province_code, item->valuestring, sizeof(location->province_code) - 1);
+    if (item != NULL) {
+        if (cJSON_IsNumber(item)) {
+            location->province_code = item->valueint;
+            location->has_province_code = true;
+        } else if (cJSON_IsString(item) && item->valuestring && item->valuestring[0] != '\0') {
+            location->province_code = (int)strtol(item->valuestring, NULL, 10);
+            location->has_province_code = true;
+        }
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "shi");
@@ -70,18 +77,31 @@ static void parse_location(const char *json, location_t *location) {
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "shicode");
-    if (item != NULL && cJSON_IsString(item) && item->valuestring) {
-        strncpy(location->city_code, item->valuestring, sizeof(location->city_code) - 1);
+    if (item != NULL) {
+        if (cJSON_IsNumber(item)) {
+            location->city_code = item->valueint;
+            location->has_city_code = true;
+        } else if (cJSON_IsString(item) && item->valuestring && item->valuestring[0] != '\0') {
+            location->city_code = (int)strtol(item->valuestring, NULL, 10);
+            location->has_city_code = true;
+        }
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "qu");
     if (item != NULL && cJSON_IsString(item) && item->valuestring) {
         strncpy(location->district, item->valuestring, sizeof(location->district) - 1);
+        location->has_district = true;
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "qucode");
-    if (item != NULL && cJSON_IsString(item) && item->valuestring) {
-        strncpy(location->district_code, item->valuestring, sizeof(location->district_code) - 1);
+    if (item != NULL) {
+        if (cJSON_IsNumber(item)) {
+            location->district_code = item->valueint;
+            location->has_district_code = true;
+        } else if (cJSON_IsString(item) && item->valuestring && item->valuestring[0] != '\0') {
+            location->district_code = (int)strtol(item->valuestring, NULL, 10);
+            location->has_district_code = true;
+        }
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "isp");
@@ -90,13 +110,21 @@ static void parse_location(const char *json, location_t *location) {
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "lat");
-    if (item != NULL && cJSON_IsString(item) && item->valuestring) {
-        strncpy(location->latitude, item->valuestring, sizeof(location->latitude) - 1);
+    if (item != NULL) {
+        if (cJSON_IsNumber(item)) {
+            location->latitude = item->valuedouble;
+        } else if (cJSON_IsString(item) && item->valuestring && item->valuestring[0] != '\0') {
+            location->latitude = strtod(item->valuestring, NULL);
+        }
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "lon");
-    if (item != NULL && cJSON_IsString(item) && item->valuestring) {
-        strncpy(location->longitude, item->valuestring, sizeof(location->longitude) - 1);
+    if (item != NULL) {
+        if (cJSON_IsNumber(item)) {
+            location->longitude = item->valuedouble;
+        } else if (cJSON_IsString(item) && item->valuestring && item->valuestring[0] != '\0') {
+            location->longitude = strtod(item->valuestring, NULL);
+        }
     }
 
     item = cJSON_GetObjectItemCaseSensitive(root, "msg");
