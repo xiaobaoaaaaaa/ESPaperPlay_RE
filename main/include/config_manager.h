@@ -16,6 +16,11 @@ esp_err_t config_manager_save_config(sys_config_t *config);
 void config_manager_get_config(sys_config_t *config);
 
 /**
+ * @brief 覆盖当前内存中的系统配置（同时不会写入 NVS）
+ */
+void config_manager_set_config(const sys_config_t *config);
+
+/**
  * @brief 初始化配置管理器
  * @return 错误码
  */

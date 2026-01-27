@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>设备配置</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #0c1116;
+            --card: #111820;
+            --accent: #3cc07b;
+            --text: #e8edf2;
+            --muted: #8ea0b3;
+            --border: #1f2a36;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgba(60, 192, 123, 0.12) 0, rgba(12, 17, 22, 0) 25%),
+                radial-gradient(circle at 80% 0%, rgba(60, 192, 123, 0.14) 0, rgba(12, 17, 22, 0) 30%),
+                var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 32px 16px 48px;
+        }
+
+        .card {
+            width: min(860px, 100%);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(6px);
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 26px;
+            letter-spacing: 0.4px;
+        }
+
+        p {
+            margin: 0 0 24px;
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #0b1016;
+            color: var(--text);
+            font-size: 15px;
+            transition: border 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(60, 192, 123, 0.18);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            background: var(--accent);
+            color: #0b1016;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.4px;
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(60, 192, 123, 0.35);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .status {
+            color: var(--muted);
+            font-size: 14px;
+            min-height: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>ESPaperPlay 配置</h1>
+        <p>在此更新 Wi-Fi 与设备参数，保存后立即写入设备。</p>
+
+        <div class="grid">
+            <div>
+                <label for="device_name">设备名称</label>
+                <input id="device_name" maxlength="31" />
+            </div>
+            <div>
+                <label for="fast_refresh_count">快速刷新次数</label>
+                <input id="fast_refresh_count" type="number" min="1" max="200" />
+            </div>
+            <div>
+                <label for="dither_mode">抖动模式</label>
+                <select id="dither_mode">
+                    <option value="0">无</option>
+                    <option value="1">有序抖动</option>
+                    <option value="2">Floyd-Steinberg</option>
+                    <option value="3">Stucki</option>
+                </select>
+            </div>
+            <div>
+                <label for="wifi_ssid">Wi-Fi SSID</label>
+                <input id="wifi_ssid" maxlength="32" />
+            </div>
+            <div>
+                <label for="wifi_password">Wi-Fi 密码</label>
+                <input id="wifi_password" type="password" maxlength="64" />
+            </div>
+            <div>
+                <label for="ip_id">IP 定位 ID</label>
+                <input id="ip_id" maxlength="63" />
+            </div>
+            <div>
+                <label for="ip_key">IP 定位 Key</label>
+                <input id="ip_key" maxlength="63" />
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="save_btn">保存配置</button>
+            <div class="status" id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        const el = (id) => document.getElementById(id);
+        const statusEl = el('status');
+
+        async function loadConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const data = await res.json();
+                el('device_name').value = data.device_name || '';
+                el('wifi_ssid').value = data.wifi?.ssid || '';
+                el('wifi_password').value = data.wifi?.password || '';
+                el('fast_refresh_count').value = data.display?.fast_refresh_count ?? '';
+                el('dither_mode').value = data.display?.dither_mode ?? 0;
+                el('ip_id').value = data.ip_location?.id || '';
+                el('ip_key').value = data.ip_location?.key || '';
+                statusEl.textContent = '已加载当前配置';
+            } catch (err) {
+                statusEl.textContent = '加载失败: ' + err;
+            }
+        }
+
+        async function saveConfig() {
+            statusEl.textContent = '保存中...';
+            const payload = {
+                device_name: el('device_name').value.trim(),
+                wifi: {
+                    ssid: el('wifi_ssid').value.trim(),
+                    password: el('wifi_password').value.trim(),
+                },
+                display: {
+                    fast_refresh_count: Number(el('fast_refresh_count').value) || 0,
+                    dither_mode: Number(el('dither_mode').value) || 0,
+                },
+                ip_location: {
+                    id: el('ip_id').value.trim(),
+                    key: el('ip_key').value.trim(),
+                },
+            };
+
+            try {
+                const res = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                statusEl.textContent = '保存成功';
+            } catch (err) {
+                statusEl.textContent = '保存失败: ' + err;
+            }
+        }
+
+        el('save_btn').addEventListener('click', saveConfig);
+        loadConfig();
+    </script>
+</body>
+
+</html>

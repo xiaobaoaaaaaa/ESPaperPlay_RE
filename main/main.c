@@ -14,6 +14,7 @@
 #include "ip_location.h"
 #include "lvgl_init.h"
 #include "sntp.h"
+#include "webserver.h"
 #include "wifi.h"
 
 #define TAG "main"
@@ -88,6 +89,12 @@ void app_main(void) {
     // 等待网络与时间初始化完成后再初始化 LVGL
     xEventGroupWaitBits(s_init_event_group, INIT_DONE_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
     ESP_LOGI(TAG, "Network/time init done, starting LVGL");
+
+    // 启动 Web 服务器，提供配置页面与 API
+    err = webserver_start("/flash");
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "webserver_start failed: %s", esp_err_to_name(err));
+    }
 
     // 初始化 LVGL
     lvgl_init_epaper_display();

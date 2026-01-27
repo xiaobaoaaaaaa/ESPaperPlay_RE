@@ -8,6 +8,10 @@ set(WIFI_SRCS
     "src/network/wifi.c"
 )
 
+set(WEBSERVER_SRCS
+    "src/network/webserver.c"
+)
+
 set(TP_SRCS
     "src/hardware/touch_pad/touch.c"
     "src/hardware/touch_pad/gpioX.c"
@@ -47,6 +51,7 @@ set(ALL_SRCS
     ${MAIN_SRCS} 
     ${CONFIG_MANAGER_SRCS}
     ${WIFI_SRCS}
+    ${WEBSERVER_SRCS}
     ${HARDWARE_SRCS}
     ${LVGL_SRCS}
     ${SERVICES_SRCS}

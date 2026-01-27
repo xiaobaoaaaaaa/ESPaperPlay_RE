@@ -1,5 +1,6 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
+#include <string.h>
 
 #include "config_manager.h"
 
@@ -7,6 +8,14 @@
 #define CONFIG_NVS_NAMESPACE "sys_config"
 
 sys_config_t sys_config;
+
+void config_manager_set_config(const sys_config_t *config) {
+    if (config == NULL) {
+        return;
+    }
+
+    memcpy(&sys_config, config, sizeof(sys_config_t));
+}
 
 /**
  * @brief 从 NVS 加载系统配置
@@ -61,30 +70,39 @@ esp_err_t sys_config_load(sys_config_t *config) {
         return err;
     }
 
-    required_size = sizeof(config->display.fast_refresh_count);
-    err = nvs_get_str(nvs_handle, "fast_refresh_count", (char *)&config->display.fast_refresh_count,
-                      &required_size);
+    int32_t stored_int = 0;
+
+    // Use shorter NVS keys (<=15 chars); keep backward compatibility with legacy key.
+    err = nvs_get_i32(nvs_handle, "frc", &stored_int);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        err = nvs_get_i32(nvs_handle, "fast_refresh_count", &stored_int);
+        if (err == ESP_OK) {
+            // Migrate: write into new key and erase old to avoid future failures.
+            nvs_set_i32(nvs_handle, "frc", stored_int);
+            nvs_erase_key(nvs_handle, "fast_refresh_count");
+        }
+    }
     if (err == ESP_OK) {
+        config->display.fast_refresh_count = stored_int;
         ESP_LOGI(TAG, "Loaded fast_refresh_count: %d", config->display.fast_refresh_count);
     } else if (err == ESP_ERR_NVS_NOT_FOUND) {
         ESP_LOGI(TAG, "fast_refresh_count not found, using default");
         config->display.fast_refresh_count = 30;
     } else {
-        ESP_LOGI(TAG, "nvs_get_str for fast_refresh_count failed: %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "nvs_get_i32 for fast_refresh_count failed: %s", esp_err_to_name(err));
         nvs_close(nvs_handle);
         return err;
     }
 
-    required_size = sizeof(config->display.dither_mode);
-    err = nvs_get_str(nvs_handle, "dither_mode", (char *)&config->display.dither_mode,
-                      &required_size);
+    err = nvs_get_i32(nvs_handle, "dither_mode", &stored_int);
     if (err == ESP_OK) {
+        config->display.dither_mode = (dither_mode_t)stored_int;
         ESP_LOGI(TAG, "Loaded dither_mode: %d", config->display.dither_mode);
     } else if (err == ESP_ERR_NVS_NOT_FOUND) {
         ESP_LOGI(TAG, "dither_mode not found, using default");
         config->display.dither_mode = DITHER_MODE_NONE;
     } else {
-        ESP_LOGI(TAG, "nvs_get_str for dither_mode failed: %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "nvs_get_i32 for dither_mode failed: %s", esp_err_to_name(err));
         nvs_close(nvs_handle);
         return err;
     }
@@ -128,6 +146,7 @@ esp_err_t config_manager_save_config(sys_config_t *config) {
     esp_err_t err = nvs_open(CONFIG_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
     if (err != ESP_OK) {
         ESP_LOGI(TAG, "nvs_open failed: %s", esp_err_to_name(err));
+        return err;
     }
 
     err = nvs_set_str(nvs_handle, "device_name", config->device_name);
@@ -151,17 +170,16 @@ esp_err_t config_manager_save_config(sys_config_t *config) {
         return err;
     }
 
-    err =
-        nvs_set_str(nvs_handle, "fast_refresh_count", (char *)&config->display.fast_refresh_count);
+    err = nvs_set_i32(nvs_handle, "frc", config->display.fast_refresh_count);
     if (err != ESP_OK) {
-        ESP_LOGI(TAG, "nvs_set_str for fast_refresh_count failed: %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "nvs_set_i32 for fast_refresh_count failed: %s", esp_err_to_name(err));
         nvs_close(nvs_handle);
         return err;
     }
 
-    err = nvs_set_str(nvs_handle, "dither_mode", (char *)&config->display.dither_mode);
+    err = nvs_set_i32(nvs_handle, "dither_mode", config->display.dither_mode);
     if (err != ESP_OK) {
-        ESP_LOGI(TAG, "nvs_set_str for dither_mode failed: %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "nvs_set_i32 for dither_mode failed: %s", esp_err_to_name(err));
         nvs_close(nvs_handle);
         return err;
     }
@@ -188,6 +206,8 @@ esp_err_t config_manager_save_config(sys_config_t *config) {
     }
 
     nvs_close(nvs_handle);
+
+    config_manager_set_config(config);
 
     ESP_LOGI(TAG, "Saved system configuration to NVS");
     return ESP_OK;
