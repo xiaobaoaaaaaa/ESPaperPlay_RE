@@ -2,6 +2,7 @@
 
 #include "esp_err.h"
 #include <stdint.h>
+#include <time.h>
 
 typedef struct {
     float temperature;  // 温度，单位摄氏度
@@ -16,6 +17,7 @@ typedef struct {
     float visibility;   // 能见度，单位公里
     float cloud;        // 云量，百分比
     float dew;          // 露点温度，单位摄氏度
+    time_t obs_time;    // 观测时间戳（Unix时间戳）
 } weather_now_t;
 
 esp_err_t get_weather_now(location_t *location, weather_now_t *weather_now);

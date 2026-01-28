@@ -98,7 +98,6 @@ void get_weather_task(void *pvParameters) {
     const char *TAG = "get_weather_task";
     location_t *location = NULL;
     weather_now_t *weather = NULL;
-    time_t last_update_time = 0;
 
     while (1) {
         // 分配内存
@@ -151,11 +150,8 @@ void get_weather_task(void *pvParameters) {
             continue;
         }
 
-        // 获取成功，更新时间戳
-        time(&last_update_time);
-
-        ESP_LOGI(TAG, "Weather updated: %.1f°C, %s (icon: %d)", weather->temperature, weather->text,
-                 weather->icon);
+        ESP_LOGI(TAG, "Weather updated: %.1f°C, %s (icon: %d, obs_time: %ld)", weather->temperature,
+                 weather->text, weather->icon, (long)weather->obs_time);
 
         // 准备UI更新数据
         char icon_str[4] = {0};
@@ -164,7 +160,13 @@ void get_weather_task(void *pvParameters) {
 
         weather_icon_to_unicode(weather->icon, icon_str, sizeof(icon_str));
         snprintf(temp_str, sizeof(temp_str), "%.0f°C", weather->temperature);
-        format_time_ago(last_update_time, uptime_str, sizeof(uptime_str));
+
+        // 使用API返回的观测时间
+        if (weather->obs_time > 0) {
+            format_time_ago(weather->obs_time, uptime_str, sizeof(uptime_str));
+        } else {
+            snprintf(uptime_str, sizeof(uptime_str), "未知");
+        }
 
         // 使用互斥锁保护UI更新
         SemaphoreHandle_t lvgl_mutex = lvgl_get_mutex();

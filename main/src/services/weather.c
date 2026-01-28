@@ -233,6 +233,28 @@ static void parse_weather_now(const char *json, weather_now_t *weather_now) {
         weather_now->dew = strtod(item->valuestring, NULL);
     }
 
+    // 解析观测时间 obsTime (ISO 8601格式: "2026-01-29T00:48+08:00")
+    item = cJSON_GetObjectItemCaseSensitive(now, "obsTime");
+    if (cJSON_IsString(item)) {
+        struct tm tm = {0};
+        // 解析ISO 8601时间格式: YYYY-MM-DDTHH:MM+TZ:TZ
+        if (sscanf(item->valuestring, "%d-%d-%dT%d:%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
+                   &tm.tm_hour, &tm.tm_min) == 5) {
+            tm.tm_year -= 1900; // tm_year是从1900年开始
+            tm.tm_mon -= 1;     // tm_mon是0-11
+            tm.tm_sec = 0;
+            tm.tm_isdst = -1; // 让系统自动判断是否夏令时
+            weather_now->obs_time = mktime(&tm);
+            ESP_LOGI(TAG, "Parsed obsTime: %s -> timestamp: %ld", item->valuestring,
+                     (long)weather_now->obs_time);
+        } else {
+            ESP_LOGW(TAG, "Failed to parse obsTime: %s", item->valuestring);
+            weather_now->obs_time = 0;
+        }
+    } else {
+        weather_now->obs_time = 0;
+    }
+
     cJSON_Delete(root);
     // 记录解析成功的日志
     ESP_LOGI(TAG, "Weather data parsed successfully: %.1f°C, %s", weather_now->temperature,
