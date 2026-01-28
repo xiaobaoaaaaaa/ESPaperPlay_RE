@@ -357,7 +357,7 @@ static esp_err_t config_post_handler(httpd_req_t *req) {
  * 初始化并启动 HTTP 服务器，注册以下请求处理函数：
  * - GET  /api/config      - 获取设备配置
  * - POST /api/config      - 更新设备配置
- * - GET  /*               - 提供静态文件服务
+ * - GET  /{*}               - 提供静态文件服务
  *
  * @param base_path 文件服务器的基础路径，若为 NULL 则使用 "/flash"
  * @return esp_err_t 错误码，ESP_OK 表示成功

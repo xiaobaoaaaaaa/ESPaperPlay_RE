@@ -26,7 +26,7 @@
 #include "ip_location.h"
 
 /** @brief 日志标签 */
-#define TAG "IP_LOCATION"
+#define TAG "ip_location"
 
 /**
  * @brief 解析 IP 定位 API 响应的 JSON 数据

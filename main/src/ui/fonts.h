@@ -8,7 +8,8 @@ extern "C" {
 #endif
 
 extern lv_font_t *ui_font_source_han_sans_sc_14;
-extern lv_font_t *ui_font_source_han_sans_sc_58;
+extern const lv_font_t ui_font_digital_numbers_48;
+extern lv_font_t *ui_font_qweather_icons_30;
 
 
 #ifdef __cplusplus

@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 extern void action_get_yiyan(lv_event_t * e);
+extern void action_get_weather(lv_event_t * e);
 
 
 #ifdef __cplusplus

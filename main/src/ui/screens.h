@@ -14,6 +14,13 @@ typedef struct _objects_t {
     lv_obj_t *obj2;
     lv_obj_t *obj3;
     lv_obj_t *obj4;
+    lv_obj_t *main_page_weather_icon;
+    lv_obj_t *main_page_weather_temp;
+    lv_obj_t *main_page_weather_uptime;
+    lv_obj_t *main_page_weather_text;
+    lv_obj_t *obj5;
+    lv_obj_t *main_page_lunar;
+    lv_obj_t *obj6;
 } objects_t;
 
 extern objects_t objects;
