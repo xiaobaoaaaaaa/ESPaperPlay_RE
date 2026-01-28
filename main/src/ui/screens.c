@@ -139,7 +139,7 @@ void create_screen_main() {
                     // main_page_weather_icon
                     lv_obj_t *obj = lv_label_create(parent_obj);
                     objects.main_page_weather_icon = obj;
-                    lv_obj_set_pos(obj, 5, 3);
+                    lv_obj_set_pos(obj, 5, 2);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_set_style_text_font(obj, ui_font_qweather_icons_30, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_align(obj, LV_ALIGN_TOP_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -150,7 +150,7 @@ void create_screen_main() {
                     // main_page_weather_temp
                     lv_obj_t *obj = lv_label_create(parent_obj);
                     objects.main_page_weather_temp = obj;
-                    lv_obj_set_pos(obj, 40, 22);
+                    lv_obj_set_pos(obj, 40, 21);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_set_style_align(obj, LV_ALIGN_TOP_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -161,7 +161,7 @@ void create_screen_main() {
                     // main_page_weather_uptime
                     lv_obj_t *obj = lv_label_create(parent_obj);
                     objects.main_page_weather_uptime = obj;
-                    lv_obj_set_pos(obj, 5, 38);
+                    lv_obj_set_pos(obj, 5, 37);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -171,7 +171,7 @@ void create_screen_main() {
                     // main_page_weather_text
                     lv_obj_t *obj = lv_label_create(parent_obj);
                     objects.main_page_weather_text = obj;
-                    lv_obj_set_pos(obj, 40, 4);
+                    lv_obj_set_pos(obj, 40, 3);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_set_style_align(obj, LV_ALIGN_TOP_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
