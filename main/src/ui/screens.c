@@ -18,17 +18,9 @@ static void event_handler_cb_main_main(lv_event_t *e) {
     void *flowState = lv_event_get_user_data(e);
     (void)flowState;
     
-    if (event == LV_EVENT_SCREEN_LOAD_START) {
-        e->user_data = (void *)0;
-        action_init_screen_stack(e);
-    }
-    if (event == LV_EVENT_SCREEN_LOADED) {
-        e->user_data = (void *)0;
-        action_push_screen_stack(e);
-    }
     if (event == LV_EVENT_GESTURE) {
         e->user_data = (void *)0;
-        flowPropagateValueLVGLEvent(flowState, 1, 2, e);
+        flowPropagateValueLVGLEvent(flowState, 1, 0, e);
     }
 }
 
@@ -59,10 +51,6 @@ static void event_handler_cb_menu_menu(lv_event_t *e) {
     void *flowState = lv_event_get_user_data(e);
     (void)flowState;
     
-    if (event == LV_EVENT_SCREEN_LOADED) {
-        e->user_data = (void *)0;
-        action_push_screen_stack(e);
-    }
     if (event == LV_EVENT_GESTURE) {
         e->user_data = (void *)0;
         action_change_to_previous_screen(e);
@@ -336,8 +324,6 @@ void create_screen_menu() {
             create_user_widget_status_bar(obj, getFlowState(flowState, 0), 3);
         }
     }
-    
-    eez_flow_delete_screen_on_unload(SCREEN_ID_MENU - 1);
     
     tick_screen_menu();
 }

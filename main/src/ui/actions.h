@@ -10,8 +10,6 @@ extern "C" {
 extern void action_get_yiyan(lv_event_t * e);
 extern void action_get_weather(lv_event_t * e);
 extern void action_change_to_previous_screen(lv_event_t * e);
-extern void action_init_screen_stack(lv_event_t * e);
-extern void action_push_screen_stack(lv_event_t * e);
 
 
 #ifdef __cplusplus
