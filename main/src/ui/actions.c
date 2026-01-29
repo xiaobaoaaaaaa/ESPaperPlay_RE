@@ -65,7 +65,7 @@ static void weather_icon_to_unicode(uint8_t icon, char *out, size_t out_size) {
 
     // 和风天气图标代码转换为Unicode码点 (Private Use Area)
     // 图标代码如100转换为0xf100
-    uint32_t unicode = 0xf100 + icon;
+    uint32_t unicode = 0xf100 + icon - 100;
 
     // 转换为UTF-8编码 (3字节，针对0xExxx范围)
     // 格式: 1110xxxx 10xxxxxx 10xxxxxx
