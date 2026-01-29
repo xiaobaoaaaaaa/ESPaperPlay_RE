@@ -93,9 +93,9 @@ static void parse_weather_now(const char *json, weather_now_t *weather_now) {
 
     item = cJSON_GetObjectItemCaseSensitive(now, "icon");
     if (cJSON_IsNumber(item)) {
-        weather_now->icon = (uint8_t)item->valueint;
+        weather_now->icon = (uint16_t)item->valueint;
     } else if (cJSON_IsString(item)) {
-        weather_now->icon = (uint8_t)atoi(item->valuestring);
+        weather_now->icon = (uint16_t)atoi(item->valuestring);
     }
 
     item = cJSON_GetObjectItemCaseSensitive(now, "text");

@@ -7,7 +7,7 @@
 typedef struct {
     float temperature;  // 温度，单位摄氏度
     float feelslike;    // 体感温度，单位摄氏度
-    uint8_t icon;       // 天气图标代码
+    uint16_t icon;      // 天气图标代码（支持100-9999）
     char text[32];      // 天气描述文本
     char wind_dir[8];   // 风向
     uint8_t wind_scale; // 风力等级

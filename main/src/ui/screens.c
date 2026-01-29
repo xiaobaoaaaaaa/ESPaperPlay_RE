@@ -167,7 +167,7 @@ void create_screen_main() {
                     lv_obj_set_style_text_font(obj, ui_font_qweather_icons_30, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_align(obj, LV_ALIGN_TOP_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_label_set_text(obj, "\uf101");
+                    lv_label_set_text(obj, "");
                 }
                 {
                     // main_page_weather_temp
@@ -178,7 +178,7 @@ void create_screen_main() {
                     lv_obj_set_style_align(obj, LV_ALIGN_TOP_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_label_set_text(obj, "°C");
+                    lv_label_set_text(obj, "");
                 }
                 {
                     // main_page_weather_uptime
@@ -188,7 +188,7 @@ void create_screen_main() {
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_label_set_text(obj, "未更新");
+                    lv_label_set_text(obj, "");
                 }
                 {
                     // main_page_weather_text
@@ -200,7 +200,7 @@ void create_screen_main() {
                     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_label_set_text(obj, "未知");
+                    lv_label_set_text(obj, "");
                 }
             }
         }
@@ -286,6 +286,42 @@ void tick_screen_main() {
         if (strcmp(new_val, cur_val) != 0) {
             tick_value_change_obj = objects.obj1;
             lv_label_set_text(objects.obj1, new_val);
+            tick_value_change_obj = NULL;
+        }
+    }
+    {
+        const char *new_val = evalTextProperty(flowState, 7, 3, "Failed to evaluate Text in Label widget");
+        const char *cur_val = lv_label_get_text(objects.main_page_weather_icon);
+        if (strcmp(new_val, cur_val) != 0) {
+            tick_value_change_obj = objects.main_page_weather_icon;
+            lv_label_set_text(objects.main_page_weather_icon, new_val);
+            tick_value_change_obj = NULL;
+        }
+    }
+    {
+        const char *new_val = evalTextProperty(flowState, 8, 3, "Failed to evaluate Text in Label widget");
+        const char *cur_val = lv_label_get_text(objects.main_page_weather_temp);
+        if (strcmp(new_val, cur_val) != 0) {
+            tick_value_change_obj = objects.main_page_weather_temp;
+            lv_label_set_text(objects.main_page_weather_temp, new_val);
+            tick_value_change_obj = NULL;
+        }
+    }
+    {
+        const char *new_val = evalTextProperty(flowState, 9, 3, "Failed to evaluate Text in Label widget");
+        const char *cur_val = lv_label_get_text(objects.main_page_weather_uptime);
+        if (strcmp(new_val, cur_val) != 0) {
+            tick_value_change_obj = objects.main_page_weather_uptime;
+            lv_label_set_text(objects.main_page_weather_uptime, new_val);
+            tick_value_change_obj = NULL;
+        }
+    }
+    {
+        const char *new_val = evalTextProperty(flowState, 10, 3, "Failed to evaluate Text in Label widget");
+        const char *cur_val = lv_label_get_text(objects.main_page_weather_text);
+        if (strcmp(new_val, cur_val) != 0) {
+            tick_value_change_obj = objects.main_page_weather_text;
+            lv_label_set_text(objects.main_page_weather_text, new_val);
             tick_value_change_obj = NULL;
         }
     }

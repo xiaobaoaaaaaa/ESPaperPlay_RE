@@ -7,8 +7,6 @@
 #include "freertos/task.h"
 
 #include "ip_location.h"
-#include "lvgl_init.h"
-#include "screens.h"
 #include "weather.h"
 #include "yiyan.h"
 
@@ -56,17 +54,112 @@ void action_get_yiyan(lv_event_t *e) {
 /**
  * @brief 将和风天气图标代码转换为Unicode字符
  *
- * 和风天气图标代码范围: 100-999
- * qweather-icons字体映射: 0xf100 - 0xf9ff
+ * 基于QWeather Icons字体映射表
+ * 参考: qweather-icons.json
  */
-static void weather_icon_to_unicode(uint8_t icon, char *out, size_t out_size) {
+static void weather_icon_to_unicode(uint16_t icon, char *out, size_t out_size) {
     if (out == NULL || out_size < 4) {
         return;
     }
 
-    // 和风天气图标代码转换为Unicode码点 (Private Use Area)
-    // 图标代码如100转换为0xf100
-    uint32_t unicode = 0xf100 + icon - 100;
+    // 和风天气图标代码到Unicode码点的映射表
+    // 格式: {图标代码, Unicode码点}
+    static const struct {
+        uint16_t code;
+        uint32_t unicode;
+    } icon_map[] = {
+        // 晴到多云系列
+        {100, 61697},
+        {101, 61698},
+        {102, 61699},
+        {103, 61700},
+        {104, 61701},
+        // 夜间晴到多云系列
+        {150, 61702},
+        {151, 61703},
+        {152, 61704},
+        {153, 61705},
+        // 雨天系列
+        {300, 61706},
+        {301, 61707},
+        {302, 61708},
+        {303, 61709},
+        {304, 61710},
+        {305, 61711},
+        {306, 61712},
+        {307, 61713},
+        {308, 61714},
+        {309, 61715},
+        {310, 61716},
+        {311, 61717},
+        {312, 61718},
+        {313, 61719},
+        {314, 61720},
+        {315, 61721},
+        {316, 61722},
+        {317, 61723},
+        {318, 61724},
+        // 夜间雨天系列
+        {350, 61725},
+        {351, 61726},
+        // 雨
+        {399, 61727},
+        // 雪天系列
+        {400, 61728},
+        {401, 61729},
+        {402, 61730},
+        {403, 61731},
+        {404, 61732},
+        {405, 61733},
+        {406, 61734},
+        {407, 61735},
+        {408, 61736},
+        {409, 61737},
+        {410, 61738},
+        // 夜间雪天系列
+        {456, 61739},
+        {457, 61740},
+        // 雪
+        {499, 61741},
+        // 雾霾沙尘系列
+        {500, 61742},
+        {501, 61743},
+        {502, 61744},
+        {503, 61745},
+        {504, 61746},
+        {507, 61747},
+        {508, 61748},
+        {509, 61749},
+        {510, 61750},
+        {511, 61751},
+        {512, 61752},
+        {513, 61753},
+        {514, 61754},
+        {515, 61755},
+        // 月相系列
+        {800, 61756},
+        {801, 61757},
+        {802, 61758},
+        {803, 61759},
+        {804, 61760},
+        {805, 61761},
+        {806, 61762},
+        {807, 61763},
+        // 极端天气
+        {900, 61764},
+        {901, 61765},
+        // 未知
+        {999, 61766},
+    };
+
+    // 查找图标代码对应的Unicode码点
+    uint32_t unicode = 61766; // 默认使用999的未知图标
+    for (size_t i = 0; i < sizeof(icon_map) / sizeof(icon_map[0]); i++) {
+        if (icon_map[i].code == icon) {
+            unicode = icon_map[i].unicode;
+            break;
+        }
+    }
 
     // 转换为UTF-8编码 (3字节，针对0xExxx范围)
     // 格式: 1110xxxx 10xxxxxx 10xxxxxx
@@ -121,13 +214,8 @@ void get_weather_task(void *pvParameters) {
             ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
 
             // 更新UI显示错误
-            SemaphoreHandle_t lvgl_mutex = lvgl_get_mutex();
-            if (lvgl_mutex != NULL) {
-                xSemaphoreTake(lvgl_mutex, portMAX_DELAY);
-                lv_label_set_text(objects.main_page_weather_text, "定位失败");
-                lv_label_set_text(objects.main_page_weather_uptime, "未更新");
-                xSemaphoreGive(lvgl_mutex);
-            }
+            set_var_weather_text("定位失败");
+            set_var_weather_uptime("未更新");
 
             vTaskDelay(pdMS_TO_TICKS(WEATHER_INTERVAL_MS));
             continue;
@@ -139,13 +227,8 @@ void get_weather_task(void *pvParameters) {
             ESP_LOGE(TAG, "get_weather_now failed: %s", esp_err_to_name(err));
 
             // 更新UI显示错误
-            SemaphoreHandle_t lvgl_mutex = lvgl_get_mutex();
-            if (lvgl_mutex != NULL) {
-                xSemaphoreTake(lvgl_mutex, portMAX_DELAY);
-                lv_label_set_text(objects.main_page_weather_text, "获取失败");
-                lv_label_set_text(objects.main_page_weather_uptime, "未更新");
-                xSemaphoreGive(lvgl_mutex);
-            }
+            set_var_weather_text("获取失败");
+            set_var_weather_uptime("未更新");
 
             vTaskDelay(pdMS_TO_TICKS(WEATHER_INTERVAL_MS));
             continue;
@@ -169,27 +252,11 @@ void get_weather_task(void *pvParameters) {
             snprintf(uptime_str, sizeof(uptime_str), "未知");
         }
 
-        // 使用互斥锁保护UI更新
-        SemaphoreHandle_t lvgl_mutex = lvgl_get_mutex();
-        if (lvgl_mutex != NULL) {
-            xSemaphoreTake(lvgl_mutex, portMAX_DELAY);
-
-            // 更新天气图标
-            lv_label_set_text(objects.main_page_weather_icon, icon_str);
-
-            // 更新温度
-            lv_label_set_text(objects.main_page_weather_temp, temp_str);
-
-            // 更新天气描述
-            lv_label_set_text(objects.main_page_weather_text, weather->text);
-
-            // 更新时间
-            lv_label_set_text(objects.main_page_weather_uptime, uptime_str);
-
-            xSemaphoreGive(lvgl_mutex);
-        } else {
-            ESP_LOGW(TAG, "LVGL mutex not available");
-        }
+        // 通过变量更新UI
+        set_var_weather_icon(icon_str);
+        set_var_weather_temp(temp_str);
+        set_var_weather_text(weather->text);
+        set_var_weather_uptime(uptime_str);
 
         // 等待10分钟或收到立即执行的通知
         ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(WEATHER_INTERVAL_MS));

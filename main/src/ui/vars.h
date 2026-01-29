@@ -30,6 +30,14 @@ extern const char *get_var_yiyan();
 extern void set_var_yiyan(const char *value);
 extern const char *get_var_solar_term();
 extern void set_var_solar_term(const char *value);
+extern const char *get_var_weather_text();
+extern void set_var_weather_text(const char *value);
+extern const char *get_var_weather_icon();
+extern void set_var_weather_icon(const char *value);
+extern const char *get_var_weather_temp();
+extern void set_var_weather_temp(const char *value);
+extern const char *get_var_weather_uptime();
+extern void set_var_weather_uptime(const char *value);
 
 
 #ifdef __cplusplus
