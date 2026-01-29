@@ -9,29 +9,41 @@ extern "C" {
 
 typedef struct _objects_t {
     lv_obj_t *main;
+    lv_obj_t *menu;
     lv_obj_t *obj0;
+    lv_obj_t *obj0__obj0;
+    lv_obj_t *obj0__obj1;
     lv_obj_t *obj1;
     lv_obj_t *obj2;
     lv_obj_t *obj3;
     lv_obj_t *obj4;
+    lv_obj_t *obj5;
     lv_obj_t *main_page_weather_icon;
     lv_obj_t *main_page_weather_temp;
     lv_obj_t *main_page_weather_uptime;
     lv_obj_t *main_page_weather_text;
-    lv_obj_t *obj5;
-    lv_obj_t *main_page_lunar;
     lv_obj_t *obj6;
+    lv_obj_t *main_page_lunar;
+    lv_obj_t *obj7;
 } objects_t;
 
 extern objects_t objects;
 
 enum ScreensEnum {
     SCREEN_ID_MAIN = 1,
+    SCREEN_ID_MENU = 2,
 };
 
 void create_screen_main();
 void delete_screen_main();
 void tick_screen_main();
+
+void create_screen_menu();
+void delete_screen_menu();
+void tick_screen_menu();
+
+void create_user_widget_status_bar(lv_obj_t *parent_obj, void *flowState, int startWidgetIndex);
+void tick_user_widget_status_bar(void *flowState, int startWidgetIndex);
 
 void create_screen_by_id(enum ScreensEnum screenId);
 void delete_screen_by_id(enum ScreensEnum screenId);

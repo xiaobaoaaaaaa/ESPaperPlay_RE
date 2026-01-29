@@ -13,6 +13,7 @@
  * @date YYYY-MM-DD
  */
 
+#include "esp_heap_caps.h"
 #include "esp_timer.h"
 #include <stdio.h>
 #include <string.h>
@@ -22,6 +23,7 @@
 
 #include "config_manager.h"
 #include "date_update.h"
+#include "solar_term.h"
 
 /** @brief 上次记录的年份 */
 static int last_year = -1;
@@ -63,6 +65,15 @@ void date_update() {
         snprintf(buffer, sizeof(buffer), "%04d年%02d月%02d日", timeinfo.tm_year + 1900,
                  timeinfo.tm_mon + 1, timeinfo.tm_mday);
         set_var_current_date(buffer);
+
+        // 更新节气信息
+        char *solar_term_buffer = heap_caps_malloc(32, MALLOC_CAP_SPIRAM);
+        if (solar_term_buffer) {
+            get_solar_term_info(timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
+                                solar_term_buffer);
+            set_var_solar_term(solar_term_buffer);
+            heap_caps_free(solar_term_buffer);
+        }
     }
 
     // 检测时间变更（时分）

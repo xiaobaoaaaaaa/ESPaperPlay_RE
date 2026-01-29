@@ -1,4 +1,5 @@
 #include "actions.h"
+#include "screen_stack.h"
 #include "vars.h"
 
 #include "esp_log.h"
@@ -213,5 +214,38 @@ void action_get_weather(lv_event_t *e) {
     } else {
         // 任务已存在，通知任务立即执行
         xTaskNotifyGive(get_weather_task_handle);
+    }
+}
+
+void action_change_to_previous_screen(lv_event_t *e) {
+    // 获取gesture方向
+    lv_dir_t dir = lv_indev_get_gesture_dir(lv_event_get_indev(e));
+    if (dir == LV_DIR_RIGHT) {
+        // 左滑，切换到上一个屏幕
+        lv_obj_t *prev_screen = NULL;
+        lv_obj_t *popped_screen = screen_stack_pop(); // 弹出当前屏幕
+        if (popped_screen == NULL) {
+            ESP_LOGW("screen_change",
+                     "No screen to pop from stack when trying to go to previous screen");
+            return;
+        }
+        screen_stack_peek(&prev_screen);
+        if (prev_screen != NULL) {
+            ESP_LOGI("screen_change", "Loading previous screen: %p", prev_screen);
+            lv_scr_load(prev_screen);
+        }
+    }
+}
+
+void action_push_screen_stack(lv_event_t *e) {
+    lv_obj_t *current_screen = lv_scr_act();
+    screen_stack_push(current_screen);
+}
+
+void action_init_screen_stack(lv_event_t *e) {
+    static bool screen_stack_initialized = false;
+    if (!screen_stack_initialized) {
+        screen_stack_init();
+        screen_stack_initialized = true;
     }
 }

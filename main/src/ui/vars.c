@@ -36,3 +36,12 @@ void set_var_yiyan(const char *value) {
     strncpy(yiyan, value, sizeof(yiyan) / sizeof(char));
     yiyan[sizeof(yiyan) / sizeof(char) - 1] = 0;
 }
+
+char solar_term[100] = {0};
+
+const char *get_var_solar_term() { return solar_term; }
+
+void set_var_solar_term(const char *value) {
+    strncpy(solar_term, value, sizeof(solar_term) / sizeof(char));
+    solar_term[sizeof(solar_term) / sizeof(char) - 1] = 0;
+}
