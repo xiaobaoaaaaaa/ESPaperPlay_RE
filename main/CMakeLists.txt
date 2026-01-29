@@ -47,6 +47,7 @@ set(SERVICES_SRCS
     "src/services/yiyan.c"
     "src/services/ip_location.c"
     "src/services/weather.c"
+    "src/services/decompress.c"
 )
 
 set(ALL_SRCS 
