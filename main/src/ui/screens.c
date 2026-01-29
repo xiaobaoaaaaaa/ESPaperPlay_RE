@@ -325,6 +325,8 @@ void create_screen_menu() {
         }
     }
     
+    eez_flow_delete_screen_on_unload(SCREEN_ID_MENU - 1);
+    
     tick_screen_menu();
 }
 
