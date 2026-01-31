@@ -290,6 +290,6 @@ void action_change_to_previous_screen(lv_event_t *e) {
     if (dir == LV_DIR_RIGHT) {
         // 左滑，返回上一个屏幕，使用 eez flow 屏幕栈管理
         ESP_LOGI("screen_change", "Popping screen with eez_flow");
-        eez_flow_pop_screen(LV_SCR_LOAD_ANIM_MOVE_RIGHT, 300, 0);
+        eez_flow_pop_screen(LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
     }
 }

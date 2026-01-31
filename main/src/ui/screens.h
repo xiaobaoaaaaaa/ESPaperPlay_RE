@@ -25,6 +25,8 @@ typedef struct _objects_t {
     lv_obj_t *obj6;
     lv_obj_t *main_page_lunar;
     lv_obj_t *obj7;
+    lv_obj_t *obj8;
+    lv_obj_t *obj9;
 } objects_t;
 
 extern objects_t objects;

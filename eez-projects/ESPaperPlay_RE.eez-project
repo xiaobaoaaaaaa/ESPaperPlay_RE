@@ -90,7 +90,7 @@
           "template": "#if defined(EEZ_FOR_LVGL)\n#include <eez/core/vars.h>\n#endif\n\n#include \"ui.h\"\n#include \"screens.h\"\n#include \"images.h\"\n#include \"actions.h\"\n#include \"vars.h\"\n\n//${eez-studio GUI_ASSETS_DEF}\n\n//${eez-studio LVGL_NATIVE_VARS_TABLE_DEF}\n\n//${eez-studio LVGL_ACTIONS_ARRAY_DEF}\n\n#if defined(EEZ_FOR_LVGL)\n\nvoid ui_init() {\n    eez_flow_init(assets, sizeof(assets), (lv_obj_t **)&objects, sizeof(objects), images, sizeof(images), actions);\n}\n\nvoid ui_tick() {\n    eez_flow_tick();\n    tick_screen(g_currentScreen);\n}\n\n#else\n\n#include <string.h>\n\nstatic int16_t currentScreen = -1;\n\nstatic lv_obj_t *getLvglObjectFromIndex(int32_t index) {\n    if (index == -1) {\n        return 0;\n    }\n    return ((lv_obj_t **)&objects)[index];\n}\n\nvoid loadScreen(enum ScreensEnum screenId) {\n    currentScreen = screenId - 1;\n    lv_obj_t *screen = getLvglObjectFromIndex(currentScreen);\n    lv_scr_load_anim(screen, LV_SCR_LOAD_ANIM_FADE_IN, 200, 0, false);\n}\n\nvoid ui_init() {\n    create_screens();\n//${eez-studio LVGL_LOAD_FIRST_SCREEN}\n}\n\nvoid ui_tick() {\n    tick_screen(currentScreen);\n}\n\n#endif\n"
         }
       ],
-      "destinationFolder": "../../Projects/esp/ESPaperPlay_RE/main/src/ui",
+      "destinationFolder": "../main/src/ui",
       "separateFolderForImagesAndFonts": true,
       "imageExportMode": "source",
       "fontExportMode": "source",
@@ -556,8 +556,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 5,
                   "top": 2,
-                  "width": 0,
-                  "height": 33,
+                  "width": 107,
+                  "height": 16,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -1079,6 +1079,266 @@
                 "objID": "675ba2e9-5bba-4513-efc9-590083561336",
                 "values": {}
               }
+            },
+            {
+              "objID": "49e7b5c8-2fc6-4e6b-e453-2eabbcf9581c",
+              "type": "LVGLContainerWidget",
+              "left": 0,
+              "top": 15,
+              "width": 100,
+              "height": 92,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "a13bc682-7d1f-46f3-f440-d8e5dc053378",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [
+                {
+                  "objID": "e2c545bc-3600-45a4-c1b2-1ac1ea49734e",
+                  "type": "LVGLLabelWidget",
+                  "left": 0,
+                  "top": 70,
+                  "width": 28,
+                  "height": 20,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "703f7362-8675-4115-bf41-89d3b6278513",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "8417a3a9-928e-41b7-d042-32bf1046bef5",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "align": "TOP_MID",
+                          "text_color": "#000000",
+                          "text_font": "SourceHanSansSC_14",
+                          "text_align": "CENTER"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "天气",
+                  "textType": "literal",
+                  "longMode": "WRAP",
+                  "recolor": false
+                },
+                {
+                  "objID": "7014ed91-7b65-4c2c-f545-8315866a9807",
+                  "type": "LVGLLabelWidget",
+                  "left": 5,
+                  "top": 10,
+                  "width": 60,
+                  "height": 60,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "6a2665c8-1fe8-4639-8b78-48ec38a094cb",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "px",
+                  "heightUnit": "px",
+                  "children": [],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "7a68a31a-6d6b-40d0-bc23-3619f7bb1e06",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "align": "TOP_MID",
+                          "text_color": "#000000",
+                          "text_font": "qweather_icons_60"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "weather_icon",
+                  "textType": "expression",
+                  "longMode": "WRAP",
+                  "recolor": false
+                }
+              ],
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "fb202e6d-5a9c-4c8c-e49e-1250657ffd7d"
+              },
+              "group": "",
+              "groupIndex": 0
+            },
+            {
+              "objID": "c4f6e880-ce99-460f-f83e-4753643af8cd",
+              "type": "LVGLContainerWidget",
+              "left": 100,
+              "top": 15,
+              "width": 100,
+              "height": 92,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "bda27098-fd45-47d4-8d03-2da78d5c5c97",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [],
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "804b448b-bebb-4738-f560-9434132dde0a"
+              },
+              "group": "",
+              "groupIndex": 0
+            },
+            {
+              "objID": "31d5ff17-e284-4977-933b-b8596cbf4200",
+              "type": "LVGLContainerWidget",
+              "left": 100,
+              "top": 107,
+              "width": 100,
+              "height": 92,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "75e18fc4-9614-4ee9-b685-a2b8ebbad1b4",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [],
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "a72a586e-854c-4dbb-f5dd-afe5c54e4d17"
+              },
+              "group": "",
+              "groupIndex": 0
+            },
+            {
+              "objID": "05ab056e-a51d-46bf-c99b-9992668f4321",
+              "type": "LVGLContainerWidget",
+              "left": 0,
+              "top": 107,
+              "width": 100,
+              "height": 92,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "d4dfa3ac-a699-49a2-8d46-e22b6250e324",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [],
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "1d195e6e-3455-4ab0-d7d1-00664084452a"
+              },
+              "group": "",
+              "groupIndex": 0
             }
           ],
           "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE|SCROLLABLE|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER",
@@ -1170,7 +1430,8 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "align": "CENTER"
+                      "align": "CENTER",
+                      "text_color": "#000000"
                     }
                   }
                 }
@@ -1234,20 +1495,6 @@
   },
   "fonts": [
     {
-      "objID": "2b03e9a9-5150-45ad-cec4-876306b40345",
-      "name": "SourceHanSansSC_14",
-      "renderingEngine": "freetype",
-      "source": {
-        "objID": "5c4779dc-e598-40e0-d485-3c44fb7754b6",
-        "filePath": "../../Projects/esp/ESPaperPlay_RE/fatfs_image/SourceHanSansSC-Regular.ttf",
-        "size": 14
-      },
-      "glyphs": [],
-      "lvglUseFreeType": true,
-      "lvglFreeTypeStyle": "NORMAL",
-      "lvglFreeTypeFilePath": "/flash/hei.ttf"
-    },
-    {
       "objID": "ef7bdb97-c029-4e6e-e835-db2cd8d9266d",
       "name": "DigitalNumbers_48",
       "renderingEngine": "LVGL",
@@ -1271,12 +1518,40 @@
       }
     },
     {
-      "objID": "05323dd0-02fc-439f-9714-a3327ecf3514",
+      "objID": "89189785-939b-4135-f2c8-7b52cdaafdd3",
+      "name": "qweather_icons_60",
+      "renderingEngine": "freetype",
+      "source": {
+        "objID": "ac092598-f522-46c4-aa42-830cb6a8a4f8",
+        "filePath": "../fatfs_image/qweather-icons.ttf",
+        "size": 50
+      },
+      "glyphs": [],
+      "lvglUseFreeType": true,
+      "lvglFreeTypeStyle": "NORMAL",
+      "lvglFreeTypeFilePath": "/flash/qweather-icons.ttf"
+    },
+    {
+      "objID": "bbd9edb6-6f73-4f87-8b9a-18a98267c989",
+      "name": "SourceHanSansSC_14",
+      "renderingEngine": "freetype",
+      "source": {
+        "objID": "2355f34e-3b18-489f-df09-184d4c8f3b6d",
+        "filePath": "../fatfs_image/hei.ttf",
+        "size": 14
+      },
+      "glyphs": [],
+      "lvglUseFreeType": true,
+      "lvglFreeTypeStyle": "NORMAL",
+      "lvglFreeTypeFilePath": "/flash/hei.ttf"
+    },
+    {
+      "objID": "e4f2056c-5ec0-484f-84ea-3a824b4e7bff",
       "name": "qweather_icons_30",
       "renderingEngine": "freetype",
       "source": {
-        "objID": "0e32f857-4f51-4a96-abc4-f21d2689394d",
-        "filePath": "../../下载/QWeather-Icons-1.8.0/font/fonts/qweather-icons.ttf",
+        "objID": "cf2fe570-7b49-4e23-ba9b-e5aeedcc3f62",
+        "filePath": "../fatfs_image/qweather-icons.ttf",
         "size": 30
       },
       "glyphs": [],
