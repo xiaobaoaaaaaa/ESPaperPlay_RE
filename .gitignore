@@ -16,6 +16,9 @@
 # Log files
 *.log
 
+# Dependency lock files
+dependencies.lock
+
 # Build artifacts and directories
 **/build/
 build/
