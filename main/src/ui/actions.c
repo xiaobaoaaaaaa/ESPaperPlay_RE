@@ -227,8 +227,23 @@ void get_weather_task(void *pvParameters) {
             ESP_LOGE(TAG, "get_weather_now failed: %s", esp_err_to_name(err));
 
             // 更新UI显示错误
+            char icon_str[4] = {0};
+            weather_icon_to_unicode(999, icon_str, sizeof(icon_str));
+
+            set_var_weather_icon(icon_str);
+            set_var_weather_temp("--");
             set_var_weather_text("获取失败");
             set_var_weather_uptime("未更新");
+            set_var_weather_location("未知");
+            set_var_weather_feelslike("--");
+            set_var_weather_wind_dir("未知风");
+            set_var_weather_wind_scale(0);
+            set_var_weather_humidity(0);
+            set_var_weather_precip(0);
+            set_var_weather_pressure(0);
+            set_var_weather_visibility(0);
+            set_var_weather_cloud(0);
+            set_var_weather_dew(0);
 
             vTaskDelay(pdMS_TO_TICKS(WEATHER_INTERVAL_MS));
             continue;
@@ -241,9 +256,14 @@ void get_weather_task(void *pvParameters) {
         char icon_str[4] = {0};
         char temp_str[16] = {0};
         char uptime_str[32] = {0};
+        char feelslike_str[16] = {0};
 
-        weather_icon_to_unicode(weather->icon, icon_str, sizeof(icon_str));
-        snprintf(temp_str, sizeof(temp_str), "%.0f°C", weather->temperature);
+        uint16_t safe_icon = weather->icon;
+        if (safe_icon < 100 || safe_icon > 999) {
+            safe_icon = 999;
+        }
+        weather_icon_to_unicode(safe_icon, icon_str, sizeof(icon_str));
+        snprintf(temp_str, sizeof(temp_str), "%.0f", weather->temperature);
 
         // 使用API返回的观测时间
         if (weather->obs_time > 0) {
@@ -252,11 +272,27 @@ void get_weather_task(void *pvParameters) {
             snprintf(uptime_str, sizeof(uptime_str), "未知");
         }
 
+        snprintf(feelslike_str, sizeof(feelslike_str), "%.0f", weather->feelslike);
+
+        const char *district = (location->has_district && location->district[0] != '\0')
+                                   ? location->district
+                                   : (location->city[0] != '\0' ? location->city : "未知");
+
         // 通过变量更新UI
         set_var_weather_icon(icon_str);
         set_var_weather_temp(temp_str);
         set_var_weather_text(weather->text);
         set_var_weather_uptime(uptime_str);
+        set_var_weather_location(district);
+        set_var_weather_feelslike(feelslike_str);
+        set_var_weather_wind_dir(weather->wind_dir);
+        set_var_weather_wind_scale(weather->wind_scale);
+        set_var_weather_humidity(weather->humidity);
+        set_var_weather_precip((int32_t)weather->precip);
+        set_var_weather_pressure((int32_t)weather->pressure);
+        set_var_weather_visibility((int32_t)weather->visibility);
+        set_var_weather_cloud((int32_t)weather->cloud);
+        set_var_weather_dew((int32_t)weather->dew);
 
         // 等待10分钟或收到立即执行的通知
         ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(WEATHER_INTERVAL_MS));

@@ -1,10 +1,10 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[ESPaperPlay_RE.eez-project]:/userPages/1",
+    "selectedUserPageObject": "[ESPaperPlay_RE.eez-project]:/userPages/2",
     "selectedUserWidgetObject": "[ESPaperPlay_RE.eez-project]:/userWidgets/0",
-    "selectedActionObject": "[ESPaperPlay_RE.eez-project]:/actions/-1",
-    "selectedGlobalVariableObject": "[ESPaperPlay_RE.eez-project]:/variables/globalVariables/4",
-    "selectedFontObject": "[ESPaperPlay_RE.eez-project]:/fonts/2",
+    "selectedGlobalVariableObject": "[ESPaperPlay_RE.eez-project]:/variables/globalVariables/12",
+    "selectedFontObject": "[ESPaperPlay_RE.eez-project]:/fonts/0",
+    "selectedBitmapObject": "[ESPaperPlay_RE.eez-project]:/bitmaps/1",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Actions"
     }
@@ -27,6 +27,7 @@
           },
           {
             "type": "border",
+            "selected": 2,
             "size": 240,
             "location": "right",
             "children": [
@@ -192,21 +193,34 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 65,
+              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#a3340bf7-54b1-40bf-9db6-beb13e5e356b",
-                  "name": "Menu",
+                  "id": "#db2a37ae-c61f-4af4-8732-b7a94a98b4cb",
+                  "name": "Weather",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userPages/1",
+                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userPages/2",
                     "permanent": false
                   },
                   "icon": "svg:page"
+                },
+                {
+                  "type": "tab",
+                  "id": "#a3340bf7-54b1-40bf-9db6-beb13e5e356b",
+                  "name": "Main",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userPages/0",
+                    "permanent": true
+                  },
+                  "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
@@ -226,8 +240,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -461,10 +474,10 @@
                 {
                   "type": "tab",
                   "id": "#9281c726-c84e-4fbe-be24-61d462633bcc",
-                  "name": "Main",
+                  "name": "Weather",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userPages/0",
+                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userPages/2",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -998,28 +1011,24 @@
       "selection": {
         "0": {
           "0": {},
-          "1": {},
           "4": {
             "0": {},
-            "1": {},
+            "1": {
+              "$selected": true
+            },
             "2": {},
             "3": {}
-          },
-          "5": {
-            "0": {}
           }
         },
         "2": {},
-        "4": {
-          "$selected": true
-        }
+        "4": {}
       },
       "transform": {
         "translate": {
-          "x": -340.4759065306032,
-          "y": -278.36358608394465
+          "x": -331.1123305045784,
+          "y": -335.33630699355876
         },
-        "scale": 2.5
+        "scale": 1.5
       },
       "timeline": {
         "isEditorActive": false,
@@ -1050,12 +1059,22 @@
     },
     "[ESPaperPlay_RE.eez-project]:/userPages/1[flow-state]": {
       "selection": {
-        "0": {}
+        "0": {
+          "1": {
+            "0": {
+              "1": {
+                "$selected": true
+              }
+            },
+            "1": {},
+            "2": {}
+          }
+        }
       },
       "transform": {
         "translate": {
-          "x": -457.64703369140625,
-          "y": -273.1763610839844
+          "x": -250.588134765625,
+          "y": -228.47042846679688
         },
         "scale": 2.5
       },
@@ -1117,6 +1136,34 @@
         },
         "scale": 1
       }
+    },
+    "[ESPaperPlay_RE.eez-project]:/userPages/2[flow-state]": {
+      "selection": {
+        "0": {
+          "0": {
+            "1": {}
+          },
+          "1": {
+            "6": {},
+            "12": {
+              "$selected": true
+            }
+          }
+        }
+      },
+      "transform": {
+        "translate": {
+          "x": -331.52935791015625,
+          "y": -238.82351684570312
+        },
+        "scale": 1.5
+      },
+      "timeline": {
+        "isEditorActive": false,
+        "position": 0,
+        "secondToPx": 200,
+        "scrollLeft": 0
+      }
     }
   },
   "activeOutputSection": 0,
@@ -1134,11 +1181,10 @@
   "lvglPart": "MAIN",
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
-    "BORDER",
-    "POSITION AND SIZE"
+    "TEXT"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 2.5,
+  "flowZoom": 1.5,
   "implementationLanguage": "C"
 }

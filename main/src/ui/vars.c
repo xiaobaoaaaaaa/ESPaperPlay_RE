@@ -81,3 +81,72 @@ void set_var_weather_uptime(const char *value) {
     strncpy(weather_uptime, value, sizeof(weather_uptime) / sizeof(char));
     weather_uptime[sizeof(weather_uptime) / sizeof(char) - 1] = 0;
 }
+
+char weather_location[100] = {0};
+
+const char *get_var_weather_location() { return weather_location; }
+
+void set_var_weather_location(const char *value) {
+    strncpy(weather_location, value, sizeof(weather_location) / sizeof(char));
+    weather_location[sizeof(weather_location) / sizeof(char) - 1] = 0;
+}
+
+char weather_feelslike[100] = {0};
+
+const char *get_var_weather_feelslike() { return weather_feelslike; }
+
+void set_var_weather_feelslike(const char *value) {
+    strncpy(weather_feelslike, value, sizeof(weather_feelslike) / sizeof(char));
+    weather_feelslike[sizeof(weather_feelslike) / sizeof(char) - 1] = 0;
+}
+
+char weather_wind_dir[100] = {0};
+
+const char *get_var_weather_wind_dir() { return weather_wind_dir; }
+
+void set_var_weather_wind_dir(const char *value) {
+    strncpy(weather_wind_dir, value, sizeof(weather_wind_dir) / sizeof(char));
+    weather_wind_dir[sizeof(weather_wind_dir) / sizeof(char) - 1] = 0;
+}
+
+int32_t weather_wind_scale;
+
+int32_t get_var_weather_wind_scale() { return weather_wind_scale; }
+
+void set_var_weather_wind_scale(int32_t value) { weather_wind_scale = value; }
+
+int32_t weather_humidity;
+
+int32_t get_var_weather_humidity() { return weather_humidity; }
+
+void set_var_weather_humidity(int32_t value) { weather_humidity = value; }
+
+int32_t weather_precip;
+
+int32_t get_var_weather_precip() { return weather_precip; }
+
+void set_var_weather_precip(int32_t value) { weather_precip = value; }
+
+int32_t weather_pressure;
+
+int32_t get_var_weather_pressure() { return weather_pressure; }
+
+void set_var_weather_pressure(int32_t value) { weather_pressure = value; }
+
+int32_t weather_visibility;
+
+int32_t get_var_weather_visibility() { return weather_visibility; }
+
+void set_var_weather_visibility(int32_t value) { weather_visibility = value; }
+
+int32_t weather_cloud;
+
+int32_t get_var_weather_cloud() { return weather_cloud; }
+
+void set_var_weather_cloud(int32_t value) { weather_cloud = value; }
+
+int32_t weather_dew;
+
+int32_t get_var_weather_dew() { return weather_dew; }
+
+void set_var_weather_dew(int32_t value) { weather_dew = value; }
