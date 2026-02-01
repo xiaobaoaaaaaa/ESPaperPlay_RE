@@ -29,7 +29,7 @@ static void event_handler_cb_main_obj1(lv_event_t *e) {
     void *flowState = lv_event_get_user_data(e);
     (void)flowState;
     
-    if (event == LV_EVENT_CLICKED) {
+    if (event == LV_EVENT_DOUBLE_CLICKED) {
         e->user_data = (void *)0;
         action_get_yiyan(e);
     }
@@ -40,7 +40,7 @@ static void event_handler_cb_main_obj2(lv_event_t *e) {
     void *flowState = lv_event_get_user_data(e);
     (void)flowState;
     
-    if (event == LV_EVENT_CLICKED) {
+    if (event == LV_EVENT_DOUBLE_CLICKED) {
         e->user_data = (void *)0;
         action_get_weather(e);
     }

@@ -501,7 +501,7 @@
               "eventHandlers": [
                 {
                   "objID": "437264e6-8519-451a-a8c0-f91023123db9",
-                  "eventName": "CLICKED",
+                  "eventName": "DOUBLE_CLICKED",
                   "handlerType": "action",
                   "action": "get_yiyan",
                   "userData": 0
@@ -620,7 +620,7 @@
               "eventHandlers": [
                 {
                   "objID": "db16bafa-f71c-498e-ad57-f7c072ca6019",
-                  "eventName": "CLICKED",
+                  "eventName": "DOUBLE_CLICKED",
                   "handlerType": "action",
                   "action": "get_weather",
                   "userData": 0
