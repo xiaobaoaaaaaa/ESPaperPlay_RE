@@ -12,13 +12,21 @@ esp_err_t config_manager_save_config(sys_config_t *config);
 
 /**
  * @brief 获取当前系统配置
+ * @param config 指向 sys_config_t 结构体的指针
  */
 void config_manager_get_config(sys_config_t *config);
 
 /**
  * @brief 覆盖当前内存中的系统配置（同时不会写入 NVS）
+ * @param config 指向 sys_config_t 结构体的指针
  */
 void config_manager_set_config(const sys_config_t *config);
+
+/**
+ * @brief 设置运行时配置（不会写入 NVS）
+ * @param config 指向 sys_config_t 结构体的指针
+ */
+void config_manager_set_runtime(sys_config_t *config);
 
 /**
  * @brief 初始化配置管理器

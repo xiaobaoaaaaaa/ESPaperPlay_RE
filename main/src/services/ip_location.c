@@ -25,8 +25,105 @@
 #include "config_manager.h"
 #include "ip_location.h"
 
+#include <time.h>
+
 /** @brief 日志标签 */
 #define TAG "ip_location"
+
+/** @brief 缓存有效期（秒） */
+#define LOCATION_CACHE_VALID_SECONDS (30 * 60) // 30分钟
+
+/**
+ * @brief 位置信息缓存结构体
+ */
+typedef struct {
+    location_t location;     // 位置信息
+    time_t last_update_time; // 最后更新时间
+    bool is_valid;           // 缓存是否有效
+} location_cache_t;
+
+/** @brief 全局缓存变量指针 */
+static location_cache_t *g_location_cache = NULL;
+
+/**
+ * @brief 初始化缓存
+ */
+static void cache_init(void) {
+    if (g_location_cache == NULL) {
+        g_location_cache = heap_caps_malloc(sizeof(location_cache_t), MALLOC_CAP_SPIRAM);
+        if (g_location_cache != NULL) {
+            memset(g_location_cache, 0, sizeof(location_cache_t));
+            g_location_cache->is_valid = false;
+        } else {
+            ESP_LOGW(TAG, "Failed to allocate memory for location cache");
+        }
+    }
+}
+
+/**
+ * @brief 检查缓存是否有效
+ *
+ * @return true 缓存有效，false 缓存无效
+ */
+static bool cache_is_valid(void) {
+    if (g_location_cache == NULL || !g_location_cache->is_valid) {
+        return false;
+    }
+
+    time_t now;
+    time(&now);
+    int elapsed = (int)difftime(now, g_location_cache->last_update_time);
+
+    if (elapsed > LOCATION_CACHE_VALID_SECONDS) {
+        ESP_LOGI(TAG, "Location cache expired: %d seconds elapsed", elapsed);
+        g_location_cache->is_valid = false;
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief 更新缓存
+ *
+ * @param location 位置信息
+ */
+static void cache_update(const location_t *location) {
+    cache_init();
+
+    if (g_location_cache == NULL) {
+        return;
+    }
+
+    memcpy(&g_location_cache->location, location, sizeof(location_t));
+    time(&g_location_cache->last_update_time);
+    g_location_cache->is_valid = true;
+
+    ESP_LOGI(TAG, "Location cache updated");
+}
+
+/**
+ * @brief 从缓存获取位置信息
+ *
+ * @param location 输出参数
+ * @return true 成功获取，false 缓存无效
+ */
+static bool cache_get(location_t *location) {
+    if (location == NULL) {
+        return false;
+    }
+
+    if (!cache_is_valid()) {
+        return false;
+    }
+
+    if (g_location_cache != NULL) {
+        memcpy(location, &g_location_cache->location, sizeof(location_t));
+        return true;
+    }
+
+    return false;
+}
 
 /**
  * @brief 解析 IP 定位 API 响应的 JSON 数据
@@ -242,13 +339,28 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt) {
  * @brief 获取 IP 地址的地理位置信息
  *
  * 通过 HTTPS API 查询给定 IP 地址的地理位置信息，返回包含国家、
- * 省份、城市等详细位置信息的结构体。
+ * 省份、城市等详细位置信息的结构体。支持30分钟内的缓存。
+ *
+ * 缓存逻辑：
+ * - 当 ip 参数为 NULL 时，优先返回缓存中的有效数据
+ * - 当 ip 参数不为 NULL 时，直接查询 API（不使用缓存）
  *
  * @param ip 要查询的 IP 地址字符串，为 NULL 时查询当前客户端 IP
  * @param location 输出参数，包含地理位置信息的结构体
  * @return esp_err_t 错误码，ESP_OK 表示成功
  */
 esp_err_t get_location(const char *ip, location_t *location) {
+    if (location == NULL) {
+        ESP_LOGE(TAG, "location pointer is NULL");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // 当 ip 为 NULL（查询当前客户端 IP）时，优先使用缓存
+    if (ip == NULL && cache_get(location)) {
+        ESP_LOGI(TAG, "Location retrieved from cache");
+        return ESP_OK;
+    }
+
     char *response_data = NULL;
 
     // 获取 API 配置
@@ -293,6 +405,12 @@ esp_err_t get_location(const char *ip, location_t *location) {
     // 解析响应数据
     if (response_data != NULL) {
         parse_location(response_data, location);
+
+        // 当查询的是当前客户端 IP 时，更新缓存
+        if (ip == NULL) {
+            cache_update(location);
+        }
+
         free(response_data);
     } else {
         ESP_LOGE(TAG, "No response data received");

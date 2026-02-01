@@ -1,5 +1,6 @@
 #include "actions.h"
 #include "eez-flow.h"
+#include "screens.h"
 #include "vars.h"
 
 #include "esp_log.h"
@@ -328,4 +329,167 @@ void action_change_to_previous_screen(lv_event_t *e) {
         ESP_LOGI("screen_change", "Popping screen with eez_flow");
         eez_flow_pop_screen(LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
     }
+}
+
+/**
+ * @brief 格式化日期为"今天"、"明天"、"周X"
+ */
+static void format_date_label(const char *fx_date, int day_index, char *out, size_t out_size) {
+    if (day_index == 0) {
+        snprintf(out, out_size, "今天");
+        return;
+    }
+    if (day_index == 1) {
+        snprintf(out, out_size, "明天");
+        return;
+    }
+
+    // 解析日期并计算星期几
+    int year, month, day;
+    if (sscanf(fx_date, "%d-%d-%d", &year, &month, &day) == 3) {
+        struct tm tm_date = {0};
+        tm_date.tm_year = year - 1900;
+        tm_date.tm_mon = month - 1;
+        tm_date.tm_mday = day;
+        mktime(&tm_date); // 计算 tm_wday
+
+        static const char *weekdays[] = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
+        snprintf(out, out_size, "%s", weekdays[tm_date.tm_wday]);
+    } else {
+        snprintf(out, out_size, "%s", fx_date + 5); // 仅显示 MM-DD
+    }
+}
+
+/**
+ * @brief 更新单日天气UI组件
+ */
+static void update_daily_weather_ui(int day_index, weather_daily_t *daily, int8_t global_temp_min,
+                                    int8_t global_temp_max, lv_obj_t *date_label,
+                                    lv_obj_t *icon_label, lv_obj_t *temp_min_label,
+                                    lv_obj_t *temp_max_label, lv_obj_t *temp_bar) {
+    char date_str[16] = {0};
+    char icon_str[4] = {0};
+    char temp_min_str[8] = {0};
+    char temp_max_str[8] = {0};
+
+    // 格式化日期
+    format_date_label(daily->fx_date, day_index, date_str, sizeof(date_str));
+
+    // 转换天气图标
+    uint16_t safe_icon = daily->icon_day;
+    if (safe_icon < 100 || safe_icon > 999) {
+        safe_icon = 999;
+    }
+    weather_icon_to_unicode(safe_icon, icon_str, sizeof(icon_str));
+
+    // 格式化温度
+    snprintf(temp_min_str, sizeof(temp_min_str), "%d", daily->temp_min);
+    snprintf(temp_max_str, sizeof(temp_max_str), "%d", daily->temp_max);
+
+    // 更新UI组件
+    lv_label_set_text(date_label, date_str);
+    lv_label_set_text(icon_label, icon_str);
+    lv_label_set_text(temp_min_label, temp_min_str);
+    lv_label_set_text(temp_max_label, temp_max_str);
+
+    // 设置bar的范围和值
+    lv_bar_set_range(temp_bar, global_temp_min, global_temp_max);
+    lv_bar_set_start_value(temp_bar, daily->temp_min, LV_ANIM_OFF);
+    lv_bar_set_value(temp_bar, daily->temp_max, LV_ANIM_OFF);
+}
+
+void action_get_weather_daily(lv_event_t *e) {
+    const char *TAG = "get_weather_daily";
+
+    // 分配内存
+    location_t *location = heap_caps_malloc(sizeof(location_t), MALLOC_CAP_SPIRAM);
+    weather_forecast_t *forecast = heap_caps_malloc(sizeof(weather_forecast_t), MALLOC_CAP_SPIRAM);
+
+    if (location == NULL || forecast == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate memory");
+        if (location)
+            heap_caps_free(location);
+        if (forecast)
+            heap_caps_free(forecast);
+        return;
+    }
+
+    // 获取位置信息
+    esp_err_t err = get_location(NULL, location);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
+        heap_caps_free(location);
+        heap_caps_free(forecast);
+        return;
+    }
+
+    // 获取7天天气预报
+    err = get_weather_forecast(location, 7, forecast);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "get_weather_forecast failed: %s", esp_err_to_name(err));
+        heap_caps_free(location);
+        heap_caps_free(forecast);
+        return;
+    }
+
+    ESP_LOGI(TAG, "Weather forecast received: %d days", forecast->count);
+
+    // 计算7天内的全局最低温和最高温
+    int8_t global_temp_min = 127;
+    int8_t global_temp_max = -128;
+    for (int i = 0; i < forecast->count && i < 7; i++) {
+        if (forecast->daily[i].temp_min < global_temp_min) {
+            global_temp_min = forecast->daily[i].temp_min;
+        }
+        if (forecast->daily[i].temp_max > global_temp_max) {
+            global_temp_max = forecast->daily[i].temp_max;
+        }
+    }
+
+    ESP_LOGI(TAG, "Global temp range: %d ~ %d", global_temp_min, global_temp_max);
+
+    // 定义UI组件数组，方便遍历更新
+    struct {
+        lv_obj_t **date_label;
+        lv_obj_t **icon_label;
+        lv_obj_t **temp_min_label;
+        lv_obj_t **temp_max_label;
+        lv_obj_t **temp_bar;
+    } daily_ui[7] = {
+        {&objects.weather_daily_date1, &objects.weather_daily_icon1,
+         &objects.weather_daily_temp_min1, &objects.weather_daily_temp_max1,
+         &objects.weather_daily_temp_bar1},
+        {&objects.weather_daily_date2, &objects.weather_daily_icon2,
+         &objects.weather_daily_temp_min2, &objects.weather_daily_temp_max2,
+         &objects.weather_daily_temp_bar2},
+        {&objects.weather_daily_date3, &objects.weather_daily_icon3,
+         &objects.weather_daily_temp_min3, &objects.weather_daily_temp_max3,
+         &objects.weather_daily_temp_bar3},
+        {&objects.weather_daily_date4, &objects.weather_daily_icon4,
+         &objects.weather_daily_temp_min4, &objects.weather_daily_temp_max4,
+         &objects.weather_daily_temp_bar4},
+        {&objects.weather_daily_date5, &objects.weather_daily_icon5,
+         &objects.weather_daily_temp_min5, &objects.weather_daily_temp_max5,
+         &objects.weather_daily_temp_bar5},
+        {&objects.weather_daily_date6, &objects.weather_daily_icon6,
+         &objects.weather_daily_temp_min6, &objects.weather_daily_temp_max6,
+         &objects.weather_daily_temp_bar6},
+        {&objects.weather_daily_date7, &objects.weather_daily_icon7,
+         &objects.weather_daily_temp_min7, &objects.weather_daily_temp_max7,
+         &objects.weather_daily_temp_bar7},
+    };
+
+    // 更新每天的UI
+    for (int i = 0; i < forecast->count && i < 7; i++) {
+        if (*daily_ui[i].date_label != NULL) {
+            update_daily_weather_ui(i, &forecast->daily[i], global_temp_min, global_temp_max,
+                                    *daily_ui[i].date_label, *daily_ui[i].icon_label,
+                                    *daily_ui[i].temp_min_label, *daily_ui[i].temp_max_label,
+                                    *daily_ui[i].temp_bar);
+        }
+    }
+
+    // 释放内存
+    heap_caps_free(location);
+    heap_caps_free(forecast);
 }
