@@ -20,6 +20,8 @@
 #include "esp_heap_caps.h"
 #include "esp_http_client.h"
 #include "esp_log.h"
+#include <ctype.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,6 +42,77 @@ typedef struct {
     void *data;      /**< 响应数据指针 */
     size_t data_len; /**< 响应数据长度 */
 } response_data_t;
+
+/**
+ * @brief URL 编码（适用于查询参数）
+ */
+static void url_encode(const char *src, char *dst, size_t dst_size) {
+    if (src == NULL || dst == NULL || dst_size == 0) {
+        return;
+    }
+
+    size_t di = 0;
+    for (size_t si = 0; src[si] != '\0'; ++si) {
+        unsigned char c = (unsigned char)src[si];
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            if (di + 1 >= dst_size) {
+                break;
+            }
+            dst[di++] = (char)c;
+        } else {
+            if (di + 3 >= dst_size) {
+                break;
+            }
+            static const char hex[] = "0123456789ABCDEF";
+            dst[di++] = '%';
+            dst[di++] = hex[(c >> 4) & 0x0F];
+            dst[di++] = hex[c & 0x0F];
+        }
+    }
+    dst[di] = '\0';
+}
+
+/**
+ * @brief 解析 GeoAPI 城市查询返回的城市 ID
+ */
+static esp_err_t parse_geo_city_id(const char *json, char *out_id, size_t out_id_size) {
+    if (json == NULL || out_id == NULL || out_id_size == 0) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    cJSON *root = cJSON_Parse(json);
+    if (root == NULL) {
+        ESP_LOGE(TAG, "Failed to parse GeoAPI JSON");
+        return ESP_FAIL;
+    }
+
+    cJSON *code = cJSON_GetObjectItemCaseSensitive(root, "code");
+    if (!cJSON_IsString(code) || strcmp(code->valuestring, "200") != 0) {
+        ESP_LOGE(TAG, "GeoAPI response code invalid");
+        cJSON_Delete(root);
+        return ESP_FAIL;
+    }
+
+    cJSON *locations = cJSON_GetObjectItemCaseSensitive(root, "location");
+    if (!cJSON_IsArray(locations) || cJSON_GetArraySize(locations) == 0) {
+        ESP_LOGE(TAG, "GeoAPI missing location array");
+        cJSON_Delete(root);
+        return ESP_FAIL;
+    }
+
+    cJSON *first = cJSON_GetArrayItem(locations, 0);
+    cJSON *id_item = cJSON_GetObjectItemCaseSensitive(first, "id");
+    if (!cJSON_IsString(id_item) || id_item->valuestring == NULL) {
+        ESP_LOGE(TAG, "GeoAPI location id missing");
+        cJSON_Delete(root);
+        return ESP_FAIL;
+    }
+
+    strncpy(out_id, id_item->valuestring, out_id_size - 1);
+    out_id[out_id_size - 1] = '\0';
+    cJSON_Delete(root);
+    return ESP_OK;
+}
 
 /**
  * @brief 解析天气 JSON 数据
@@ -536,10 +609,98 @@ esp_err_t get_weather_now(location_t *location, weather_now_t *weather_now) {
     }
 
     // 构建 API 请求 URL
-    char url[256];
-    snprintf(url, sizeof(url), "https://%s/v7/weather/now?location=%.2f,%.2f&key=%s",
-             sys_config.weather.api_host, location->longitude, location->latitude,
-             sys_config.weather.api_key);
+    // 如果位置信息可用，则使用经纬度查询；否则使用系统配置中存储的城市名称查询
+    char url[512];
+    if (location != NULL) {
+        snprintf(url, sizeof(url), "https://%s/v7/weather/now?location=%.2f,%.2f&key=%s",
+                 sys_config.weather.api_host, location->longitude, location->latitude,
+                 sys_config.weather.api_key);
+    } else {
+        if (strlen(sys_config.weather.city) == 0) {
+            ESP_LOGE(TAG, "No location information available and city is not configured");
+            return ESP_ERR_INVALID_ARG;
+        }
+
+        // 通过和风天气 GeoAPI 获取城市ID
+        char city_encoded[192];
+        url_encode(sys_config.weather.city, city_encoded, sizeof(city_encoded));
+
+        char geo_url[512];
+        snprintf(geo_url, sizeof(geo_url), "https://%s/geo/v2/city/lookup?location=%s&key=%s",
+                 sys_config.weather.api_host, city_encoded, sys_config.weather.api_key);
+
+        response_data_t geo_response = {.data = NULL, .data_len = 0};
+        esp_http_client_config_t geo_config = {.url = geo_url,
+                                               .event_handler = http_event_handler,
+                                               .crt_bundle_attach = esp_crt_bundle_attach,
+                                               .user_data = &geo_response};
+
+        esp_http_client_handle_t geo_client = esp_http_client_init(&geo_config);
+        esp_err_t geo_err = esp_http_client_perform(geo_client);
+        if (geo_err != ESP_OK) {
+            ESP_LOGE(TAG, "GeoAPI request failed: %s", esp_err_to_name(geo_err));
+            esp_http_client_cleanup(geo_client);
+            return geo_err;
+        }
+        esp_http_client_cleanup(geo_client);
+
+        if (geo_response.data == NULL || geo_response.data_len == 0) {
+            ESP_LOGE(TAG, "GeoAPI no response data received");
+            return ESP_ERR_INVALID_RESPONSE;
+        }
+
+        char *geo_json = NULL;
+        unsigned char *geo_raw = (unsigned char *)geo_response.data;
+        bool is_gzip = (geo_response.data_len >= 2 && geo_raw[0] == 0x1F && geo_raw[1] == 0x8B);
+
+        if (is_gzip) {
+            size_t decompressed_size = 0;
+            char *decompressed_buf = (char *)heap_caps_malloc(4096, MALLOC_CAP_SPIRAM);
+            if (decompressed_buf == NULL) {
+                ESP_LOGE(TAG, "Failed to allocate memory for GeoAPI decompressed buffer");
+                heap_caps_free(geo_response.data);
+                return ESP_ERR_NO_MEM;
+            }
+
+            int decompress_result =
+                network_gzip_decompress(geo_response.data, geo_response.data_len, decompressed_buf,
+                                        &decompressed_size, 4096);
+            if (decompress_result != Z_OK) {
+                ESP_LOGE(TAG, "Failed to decompress GeoAPI response: %d", decompress_result);
+                heap_caps_free(decompressed_buf);
+                heap_caps_free(geo_response.data);
+                return ESP_FAIL;
+            }
+            if (decompressed_size >= 4096) {
+                decompressed_size = 4095;
+            }
+            decompressed_buf[decompressed_size] = '\0';
+            geo_json = decompressed_buf;
+        } else {
+            geo_json = (char *)heap_caps_malloc(geo_response.data_len + 1, MALLOC_CAP_SPIRAM);
+            if (geo_json == NULL) {
+                ESP_LOGE(TAG, "Failed to allocate memory for GeoAPI json buffer");
+                heap_caps_free(geo_response.data);
+                return ESP_ERR_NO_MEM;
+            }
+            memcpy(geo_json, geo_response.data, geo_response.data_len);
+            geo_json[geo_response.data_len] = '\0';
+        }
+
+        char city_id[32] = {0};
+        esp_err_t parse_err = parse_geo_city_id(geo_json, city_id, sizeof(city_id));
+
+        heap_caps_free(geo_json);
+        heap_caps_free(geo_response.data);
+
+        if (parse_err != ESP_OK || city_id[0] == '\0') {
+            ESP_LOGE(TAG, "Failed to parse GeoAPI city id");
+            return ESP_FAIL;
+        }
+
+        snprintf(url, sizeof(url), "https://%s/v7/weather/now?location=%s&key=%s",
+                 sys_config.weather.api_host, city_id, sys_config.weather.api_key);
+    }
 
     // 配置 HTTP 客户端
     esp_http_client_config_t config = {.url = url,
@@ -615,7 +776,7 @@ esp_err_t get_weather_forecast(location_t *location, uint8_t days,
     response_data_t response_data = {.data = NULL, .data_len = 0};
 
     // 参数有效性检查
-    if (location == NULL || weather_forecast == NULL) {
+    if (weather_forecast == NULL) {
         ESP_LOGE(TAG, "Invalid pointer parameters");
         return ESP_ERR_INVALID_ARG;
     }
@@ -636,10 +797,98 @@ esp_err_t get_weather_forecast(location_t *location, uint8_t days,
     }
 
     // 构建 API 请求 URL，根据天数选择端点
-    char url[256];
-    snprintf(url, sizeof(url), "https://%s/v7/weather/%dd?location=%.2f,%.2f&key=%s",
-             sys_config.weather.api_host, days, location->longitude, location->latitude,
-             sys_config.weather.api_key);
+    // 如果位置信息可用，则使用经纬度查询；否则使用系统配置中存储的城市名称查询
+    char url[512];
+    if (location != NULL) {
+        snprintf(url, sizeof(url), "https://%s/v7/weather/%dd?location=%.2f,%.2f&key=%s",
+                 sys_config.weather.api_host, days, location->longitude, location->latitude,
+                 sys_config.weather.api_key);
+    } else {
+        if (strlen(sys_config.weather.city) == 0) {
+            ESP_LOGE(TAG, "No location information available and city is not configured");
+            return ESP_ERR_INVALID_ARG;
+        }
+
+        // 通过和风天气 GeoAPI 获取城市ID
+        char city_encoded[192];
+        url_encode(sys_config.weather.city, city_encoded, sizeof(city_encoded));
+
+        char geo_url[512];
+        snprintf(geo_url, sizeof(geo_url), "https://%s/geo/v2/city/lookup?location=%s&key=%s",
+                 sys_config.weather.api_host, city_encoded, sys_config.weather.api_key);
+
+        response_data_t geo_response = {.data = NULL, .data_len = 0};
+        esp_http_client_config_t geo_config = {.url = geo_url,
+                                               .event_handler = http_event_handler,
+                                               .crt_bundle_attach = esp_crt_bundle_attach,
+                                               .user_data = &geo_response};
+
+        esp_http_client_handle_t geo_client = esp_http_client_init(&geo_config);
+        esp_err_t geo_err = esp_http_client_perform(geo_client);
+        if (geo_err != ESP_OK) {
+            ESP_LOGE(TAG, "GeoAPI request failed: %s", esp_err_to_name(geo_err));
+            esp_http_client_cleanup(geo_client);
+            return geo_err;
+        }
+        esp_http_client_cleanup(geo_client);
+
+        if (geo_response.data == NULL || geo_response.data_len == 0) {
+            ESP_LOGE(TAG, "GeoAPI no response data received");
+            return ESP_ERR_INVALID_RESPONSE;
+        }
+
+        char *geo_json = NULL;
+        unsigned char *geo_raw = (unsigned char *)geo_response.data;
+        bool is_gzip = (geo_response.data_len >= 2 && geo_raw[0] == 0x1F && geo_raw[1] == 0x8B);
+
+        if (is_gzip) {
+            size_t decompressed_size = 0;
+            char *decompressed_buf = (char *)heap_caps_malloc(4096, MALLOC_CAP_SPIRAM);
+            if (decompressed_buf == NULL) {
+                ESP_LOGE(TAG, "Failed to allocate memory for GeoAPI decompressed buffer");
+                heap_caps_free(geo_response.data);
+                return ESP_ERR_NO_MEM;
+            }
+
+            int decompress_result =
+                network_gzip_decompress(geo_response.data, geo_response.data_len, decompressed_buf,
+                                        &decompressed_size, 4096);
+            if (decompress_result != Z_OK) {
+                ESP_LOGE(TAG, "Failed to decompress GeoAPI response: %d", decompress_result);
+                heap_caps_free(decompressed_buf);
+                heap_caps_free(geo_response.data);
+                return ESP_FAIL;
+            }
+            if (decompressed_size >= 4096) {
+                decompressed_size = 4095;
+            }
+            decompressed_buf[decompressed_size] = '\0';
+            geo_json = decompressed_buf;
+        } else {
+            geo_json = (char *)heap_caps_malloc(geo_response.data_len + 1, MALLOC_CAP_SPIRAM);
+            if (geo_json == NULL) {
+                ESP_LOGE(TAG, "Failed to allocate memory for GeoAPI json buffer");
+                heap_caps_free(geo_response.data);
+                return ESP_ERR_NO_MEM;
+            }
+            memcpy(geo_json, geo_response.data, geo_response.data_len);
+            geo_json[geo_response.data_len] = '\0';
+        }
+
+        char city_id[32] = {0};
+        esp_err_t parse_err = parse_geo_city_id(geo_json, city_id, sizeof(city_id));
+
+        heap_caps_free(geo_json);
+        heap_caps_free(geo_response.data);
+
+        if (parse_err != ESP_OK || city_id[0] == '\0') {
+            ESP_LOGE(TAG, "Failed to parse GeoAPI city id");
+            return ESP_FAIL;
+        }
+
+        snprintf(url, sizeof(url), "https://%s/v7/weather/%dd?location=%s&key=%s",
+                 sys_config.weather.api_host, days, city_id, sys_config.weather.api_key);
+    }
 
     // 配置 HTTP 客户端
     esp_http_client_config_t config = {.url = url,
