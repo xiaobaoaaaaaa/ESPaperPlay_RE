@@ -198,7 +198,7 @@
         "objID": "fc58844b-fb6e-48c2-d5f1-82c35530d0bb",
         "name": "weather_windDir",
         "type": "string",
-        "defaultValue": "\"未知风\"",
+        "defaultValue": "\"未知\"",
         "persistent": false,
         "native": true
       },
@@ -633,13 +633,6 @@
                   "handlerType": "action",
                   "action": "get_weather",
                   "userData": 0
-                },
-                {
-                  "objID": "93305890-e21f-4e30-d57d-c11b4c9fbd25",
-                  "eventName": "LONG_PRESSED",
-                  "handlerType": "flow",
-                  "action": "get_yiyan",
-                  "userData": 0
                 }
               ],
               "leftUnit": "px",
@@ -1044,8 +1037,8 @@
           "type": "LVGLActionComponent",
           "left": 244,
           "top": 91,
-          "width": 292,
-          "height": 53,
+          "width": 293,
+          "height": 54,
           "customInputs": [],
           "customOutputs": [],
           "actions": [
@@ -1064,43 +1057,6 @@
               "useStackType": "literal"
             }
           ]
-        },
-        {
-          "objID": "15344cde-9a2a-4f5f-8932-b7f623305ccd",
-          "type": "LVGLActionComponent",
-          "left": 131,
-          "top": 248,
-          "width": 317,
-          "height": 53,
-          "customInputs": [],
-          "customOutputs": [],
-          "actions": [
-            {
-              "objID": "584738ca-845d-44be-95af-4f726f430c87",
-              "action": "changeScreen",
-              "screen": "Weather",
-              "screenType": "literal",
-              "fadeMode": "MOVE_LEFT",
-              "fadeModeType": "literal",
-              "speed": 200,
-              "speedType": "literal",
-              "delay": 0,
-              "delayType": "literal",
-              "useStack": true,
-              "useStackType": "literal"
-            }
-          ]
-        },
-        {
-          "objID": "7f507079-374f-4dce-c9ed-5ce385a72582",
-          "type": "DelayActionComponent",
-          "left": -366,
-          "top": 74,
-          "width": 87,
-          "height": 53,
-          "customInputs": [],
-          "customOutputs": [],
-          "milliseconds": "10000"
         }
       ],
       "connectionLines": [
@@ -1119,22 +1075,8 @@
           "input": "@seqin"
         },
         {
-          "objID": "00172b1b-f725-4f1a-b737-a4d5fbdcbeb0",
-          "source": "3e51f3eb-c13a-4ad3-e924-3f0e7b531785",
-          "output": "LONG_PRESSED",
-          "target": "15344cde-9a2a-4f5f-8932-b7f623305ccd",
-          "input": "@seqin"
-        },
-        {
-          "objID": "4a7946dc-435e-4c54-964b-50d5dd768027",
+          "objID": "54e04c28-4543-447f-a689-9db414d8435c",
           "source": "f1342530-f1e8-4073-e308-3ae8430e6b11",
-          "output": "@seqout",
-          "target": "7f507079-374f-4dce-c9ed-5ce385a72582",
-          "input": "@seqin"
-        },
-        {
-          "objID": "26dfb3af-3073-402d-95e3-737631736b44",
-          "source": "7f507079-374f-4dce-c9ed-5ce385a72582",
           "output": "@seqout",
           "target": "c28392bc-9d38-485e-ff91-6ac7bcf54d3e",
           "input": "@seqin"
@@ -1556,7 +1498,7 @@
           "left": 139,
           "top": -68,
           "width": 317,
-          "height": 53,
+          "height": 54,
           "customInputs": [],
           "customOutputs": [],
           "actions": [
@@ -1809,7 +1751,7 @@
                   "type": "LVGLLabelWidget",
                   "left": 19,
                   "top": -24,
-                  "width": 298,
+                  "width": 334,
                   "height": 20,
                   "customInputs": [],
                   "customOutputs": [],
@@ -1850,7 +1792,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "weather_windDir+weather_windScale+\"级\"",
+                  "text": "weather_windDir+\"风\"+weather_windScale+\"级\"",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false
@@ -3451,7 +3393,7 @@
           "left": 234,
           "top": 239,
           "width": 354,
-          "height": 53,
+          "height": 54,
           "customInputs": [],
           "customOutputs": [],
           "actions": [

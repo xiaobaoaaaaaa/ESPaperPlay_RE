@@ -44,10 +44,6 @@ static void event_handler_cb_main_obj2(lv_event_t *e) {
         e->user_data = (void *)0;
         action_get_weather(e);
     }
-    if (event == LV_EVENT_LONG_PRESSED) {
-        e->user_data = (void *)0;
-        flowPropagateValueLVGLEvent(flowState, 6, 1, e);
-    }
 }
 
 static void event_handler_cb_menu_menu(lv_event_t *e) {
