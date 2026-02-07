@@ -1173,7 +1173,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 65, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_icon1
@@ -1195,7 +1195,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "今天");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_tempBar1
@@ -1217,7 +1217,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                     }
                 }
@@ -1244,7 +1244,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 65, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_icon2
@@ -1266,7 +1266,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "今天");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_tempBar2
@@ -1288,7 +1288,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                     }
                 }
@@ -1315,7 +1315,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 65, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_icon3
@@ -1337,7 +1337,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "今天");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_tempBar3
@@ -1359,7 +1359,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                     }
                 }
@@ -1386,7 +1386,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 65, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_icon4
@@ -1408,7 +1408,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "今天");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_tempBar4
@@ -1430,7 +1430,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                     }
                 }
@@ -1457,7 +1457,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 65, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_icon5
@@ -1479,7 +1479,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "今天");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_tempBar5
@@ -1501,7 +1501,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                     }
                 }
@@ -1528,7 +1528,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 65, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_icon6
@@ -1550,7 +1550,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "今天");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_tempBar6
@@ -1572,7 +1572,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                     }
                 }
@@ -1599,7 +1599,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 65, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_icon7
@@ -1621,7 +1621,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_text_font(obj, ui_font_source_han_sans_sc_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "今天");
+                            lv_label_set_text(obj, "");
                         }
                         {
                             // weather_daily_tempBar7
@@ -1643,7 +1643,7 @@ void create_screen_weather_daily() {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "26");
+                            lv_label_set_text(obj, "");
                         }
                     }
                 }
