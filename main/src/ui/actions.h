@@ -11,6 +11,7 @@ extern void action_get_yiyan(lv_event_t * e);
 extern void action_get_weather(lv_event_t * e);
 extern void action_change_to_previous_screen(lv_event_t * e);
 extern void action_get_weather_daily(lv_event_t * e);
+extern void action_get_signal_strength(lv_event_t * e);
 
 
 #ifdef __cplusplus

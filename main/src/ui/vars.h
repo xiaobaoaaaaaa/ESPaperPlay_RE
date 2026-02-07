@@ -58,6 +58,8 @@ extern int32_t get_var_weather_cloud();
 extern void set_var_weather_cloud(int32_t value);
 extern int32_t get_var_weather_dew();
 extern void set_var_weather_dew(int32_t value);
+extern int32_t get_var_wifi_signal();
+extern void set_var_wifi_signal(int32_t value);
 
 
 #ifdef __cplusplus

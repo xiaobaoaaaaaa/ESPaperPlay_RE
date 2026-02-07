@@ -1744,8 +1744,17 @@ void create_user_widget_status_bar(lv_obj_t *parent_obj, void *flowState, int st
             {
                 lv_obj_t *parent_obj = obj;
                 {
-                    lv_obj_t *obj = lv_label_create(parent_obj);
+                    // wifi_signal
+                    lv_obj_t *obj = lv_image_create(parent_obj);
                     ((lv_obj_t **)&objects)[startWidgetIndex + 1] = obj;
+                    lv_obj_set_pos(obj, 0, 0);
+                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                    lv_image_set_src(obj, &img_signal_1);
+                    lv_obj_set_style_align(obj, LV_ALIGN_RIGHT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
+                }
+                {
+                    lv_obj_t *obj = lv_label_create(parent_obj);
+                    ((lv_obj_t **)&objects)[startWidgetIndex + 2] = obj;
                     lv_obj_set_pos(obj, 0, 0);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1761,11 +1770,11 @@ void tick_user_widget_status_bar(void *flowState, int startWidgetIndex) {
     (void)flowState;
     (void)startWidgetIndex;
     {
-        const char *new_val = evalTextProperty(flowState, 0, 3, "Failed to evaluate Text in Label widget");
-        const char *cur_val = lv_label_get_text(((lv_obj_t **)&objects)[startWidgetIndex + 1]);
+        const char *new_val = evalTextProperty(flowState, 2, 3, "Failed to evaluate Text in Label widget");
+        const char *cur_val = lv_label_get_text(((lv_obj_t **)&objects)[startWidgetIndex + 2]);
         if (strcmp(new_val, cur_val) != 0) {
-            tick_value_change_obj = ((lv_obj_t **)&objects)[startWidgetIndex + 1];
-            lv_label_set_text(((lv_obj_t **)&objects)[startWidgetIndex + 1], new_val);
+            tick_value_change_obj = ((lv_obj_t **)&objects)[startWidgetIndex + 2];
+            lv_label_set_text(((lv_obj_t **)&objects)[startWidgetIndex + 2], new_val);
             tick_value_change_obj = NULL;
         }
     }
@@ -1773,7 +1782,7 @@ void tick_user_widget_status_bar(void *flowState, int startWidgetIndex) {
 
 
 static const char *screen_names[] = { "Main", "Menu", "Weather", "Weather_daily" };
-static const char *object_names[] = { "main", "menu", "weather", "weather_daily", "obj0", "obj0__obj0", "obj0__obj1", "obj1", "obj2", "obj3", "obj4", "obj5", "obj6", "obj7", "main_page_weather_icon", "main_page_weather_temp", "main_page_weather_uptime", "main_page_weather_text", "obj8", "main_page_lunar", "obj9", "obj10", "obj11", "obj12", "obj13", "obj14", "obj15", "obj16", "obj17", "obj18", "obj19", "obj20", "obj21", "obj22", "obj23", "obj24", "obj25", "obj26", "obj27", "obj28", "obj29", "obj30", "obj31", "obj32", "obj33", "obj34", "obj35", "obj36", "obj37", "obj38", "obj39", "weather_daily_temp_min1", "weather_daily_icon1", "weather_daily_date1", "weather_daily_temp_bar1", "weather_daily_temp_max1", "obj40", "weather_daily_temp_min2", "weather_daily_icon2", "weather_daily_date2", "weather_daily_temp_bar2", "weather_daily_temp_max2", "obj41", "weather_daily_temp_min3", "weather_daily_icon3", "weather_daily_date3", "weather_daily_temp_bar3", "weather_daily_temp_max3", "obj42", "weather_daily_temp_min4", "weather_daily_icon4", "weather_daily_date4", "weather_daily_temp_bar4", "weather_daily_temp_max4", "obj43", "weather_daily_temp_min5", "weather_daily_icon5", "weather_daily_date5", "weather_daily_temp_bar5", "weather_daily_temp_max5", "obj44", "weather_daily_temp_min6", "weather_daily_icon6", "weather_daily_date6", "weather_daily_temp_bar6", "weather_daily_temp_max6", "obj45", "weather_daily_temp_min7", "weather_daily_icon7", "weather_daily_date7", "weather_daily_temp_bar7", "weather_daily_temp_max7" };
+static const char *object_names[] = { "main", "menu", "weather", "weather_daily", "obj0", "obj0__obj0", "obj0__wifi_signal", "obj0__obj1", "obj1", "obj2", "obj3", "obj4", "obj5", "obj6", "obj7", "main_page_weather_icon", "main_page_weather_temp", "main_page_weather_uptime", "main_page_weather_text", "obj8", "main_page_lunar", "obj9", "obj10", "obj11", "obj12", "obj13", "obj14", "obj15", "obj16", "obj17", "obj18", "obj19", "obj20", "obj21", "obj22", "obj23", "obj24", "obj25", "obj26", "obj27", "obj28", "obj29", "obj30", "obj31", "obj32", "obj33", "obj34", "obj35", "obj36", "obj37", "obj38", "obj39", "weather_daily_temp_min1", "weather_daily_icon1", "weather_daily_date1", "weather_daily_temp_bar1", "weather_daily_temp_max1", "obj40", "weather_daily_temp_min2", "weather_daily_icon2", "weather_daily_date2", "weather_daily_temp_bar2", "weather_daily_temp_max2", "obj41", "weather_daily_temp_min3", "weather_daily_icon3", "weather_daily_date3", "weather_daily_temp_bar3", "weather_daily_temp_max3", "obj42", "weather_daily_temp_min4", "weather_daily_icon4", "weather_daily_date4", "weather_daily_temp_bar4", "weather_daily_temp_max4", "obj43", "weather_daily_temp_min5", "weather_daily_icon5", "weather_daily_date5", "weather_daily_temp_bar5", "weather_daily_temp_max5", "obj44", "weather_daily_temp_min6", "weather_daily_icon6", "weather_daily_date6", "weather_daily_temp_bar6", "weather_daily_temp_max6", "obj45", "weather_daily_temp_min7", "weather_daily_icon7", "weather_daily_date7", "weather_daily_temp_bar7", "weather_daily_temp_max7" };
 
 
 typedef void (*create_screen_func_t)();

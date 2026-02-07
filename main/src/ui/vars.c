@@ -150,3 +150,9 @@ int32_t weather_dew;
 int32_t get_var_weather_dew() { return weather_dew; }
 
 void set_var_weather_dew(int32_t value) { weather_dew = value; }
+
+int32_t wifi_signal;
+
+int32_t get_var_wifi_signal() { return wifi_signal; }
+
+void set_var_wifi_signal(int32_t value) { wifi_signal = value; }

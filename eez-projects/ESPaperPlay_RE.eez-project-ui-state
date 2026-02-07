@@ -1,13 +1,13 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[ESPaperPlay_RE.eez-project]:/userPages/0",
+    "selectedUserPageObject": "[ESPaperPlay_RE.eez-project]:/userPages/2",
     "selectedUserWidgetObject": "[ESPaperPlay_RE.eez-project]:/userWidgets/0",
-    "selectedActionObject": "[ESPaperPlay_RE.eez-project]:/actions/3",
-    "selectedGlobalVariableObject": "[ESPaperPlay_RE.eez-project]:/variables/globalVariables/12",
+    "selectedActionObject": "[ESPaperPlay_RE.eez-project]:/actions/4",
+    "selectedGlobalVariableObject": "[ESPaperPlay_RE.eez-project]:/variables/globalVariables/19",
     "selectedFontObject": "[ESPaperPlay_RE.eez-project]:/fonts/0",
-    "selectedBitmapObject": "[ESPaperPlay_RE.eez-project]:/bitmaps/1",
+    "selectedBitmapObject": "[ESPaperPlay_RE.eez-project]:/bitmaps/10",
     "subnavigationSelectedItems": {
-      "variables-tab/sub-navigation/selected-item": "Widgets"
+      "variables-tab/sub-navigation/selected-item": "Actions"
     }
   },
   "layoutModel": {
@@ -28,7 +28,6 @@
           },
           {
             "type": "border",
-            "selected": 2,
             "size": 240,
             "location": "right",
             "children": [
@@ -128,6 +127,7 @@
                   "type": "tabset",
                   "id": "#40e4fc45-60c7-45ce-aad1-0c1d6df51ce3",
                   "weight": 1,
+                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -194,17 +194,28 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 63.24209714726292,
-              "selected": 2,
+              "selected": 3,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#daeead9b-46f0-4c53-b1c6-7f0a36c3cc86",
-                  "name": "actions_get_weather_daily",
+                  "id": "#a9ec0f36-2183-47ae-bd81-78271a6adb91",
+                  "name": "status_bar",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[ESPaperPlay_RE.eez-project]:/actions/3",
+                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userWidgets/0",
+                    "permanent": false
+                  },
+                  "icon": "svg:user_widget"
+                },
+                {
+                  "type": "tab",
+                  "id": "#daeead9b-46f0-4c53-b1c6-7f0a36c3cc86",
+                  "name": "get_signal_strength",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[ESPaperPlay_RE.eez-project]:/actions/4",
                     "permanent": false
                   },
                   "icon": "material:code"
@@ -212,10 +223,10 @@
                 {
                   "type": "tab",
                   "id": "#db2a37ae-c61f-4af4-8732-b7a94a98b4cb",
-                  "name": "Menu",
+                  "name": "Weather_daily",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userPages/1",
+                    "objectPath": "[ESPaperPlay_RE.eez-project]:/userPages/3",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -231,7 +242,8 @@
                   },
                   "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
@@ -241,7 +253,7 @@
                 {
                   "type": "tabset",
                   "id": "#279ddebc-ede4-45eb-9d73-7f36968c3913",
-                  "weight": 1.9202988792029887,
+                  "weight": 1.3959938366718028,
                   "children": [
                     {
                       "type": "tab",
@@ -251,13 +263,12 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
                   "id": "#317cf0ab-1d98-48f9-9f80-9e7b42d5fc10",
-                  "weight": 1.0797011207970113,
+                  "weight": 1.6040061633281972,
                   "children": [
                     {
                       "type": "tab",
@@ -1031,16 +1042,14 @@
           }
         },
         "4": {},
-        "6": {
-          "$selected": true
-        }
+        "8": {}
       },
       "transform": {
         "translate": {
-          "x": 436.44252053925493,
-          "y": -129.59449642412585
+          "x": 114.55121183946403,
+          "y": -117.76764251115583
         },
-        "scale": 1.75
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1100,17 +1109,15 @@
     "[ESPaperPlay_RE.eez-project]:/userWidgets/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {
-            "$selected": true
-          }
+          "1": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -140,
-          "y": 11.5931396484375
+          "x": -235.31718575613843,
+          "y": -59.802120317731635
         },
-        "scale": 2.5
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1143,8 +1150,8 @@
       "selection": {},
       "transform": {
         "translate": {
-          "x": 0,
-          "y": 0
+          "x": -44,
+          "y": 17.600006103515625
         },
         "scale": 1
       }
@@ -1188,7 +1195,8 @@
             "4": {},
             "5": {},
             "6": {
-              "3": {
+              "3": {},
+              "4": {
                 "$selected": true
               }
             }
@@ -1198,9 +1206,9 @@
       "transform": {
         "translate": {
           "x": -100,
-          "y": -100
+          "y": -200
         },
-        "scale": 1.75
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1224,9 +1232,11 @@
   "selectedStylePropertyName": "",
   "lvglPart": "MAIN",
   "lvglState": "DEFAULT",
-  "lvglExpandedPropertiesGroup": [],
+  "lvglExpandedPropertiesGroup": [
+    "POSITION AND SIZE"
+  ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1.75,
+  "flowZoom": 1.1,
   "implementationLanguage": "C"
 }

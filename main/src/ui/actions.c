@@ -4,6 +4,7 @@
 #include "vars.h"
 
 #include "esp_log.h"
+#include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
@@ -12,6 +13,7 @@
 #include "ip_location.h"
 #include "lvgl_init.h"
 #include "weather.h"
+#include "wifi.h"
 #include "yiyan.h"
 
 #include <sys/time.h>
@@ -552,5 +554,32 @@ void action_get_weather_daily(lv_event_t *e) {
                     &get_weather_daily_task_handle);
     } else {
         xTaskNotifyGive(get_weather_daily_task_handle);
+    }
+}
+
+void action_get_signal_strength(lv_event_t *e) {
+    if (is_wifi_connected()) {
+        wifi_ap_record_t ap_info;
+        if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK) {
+            switch (ap_info.rssi) {
+            case -60 ... 0:
+                set_var_wifi_signal(4);
+                break;
+            case -67 ... - 61:
+                set_var_wifi_signal(3);
+                break;
+            case -75 ... - 68:
+                set_var_wifi_signal(2);
+                break;
+
+            default:
+                set_var_wifi_signal(1);
+                break;
+            }
+        } else {
+            set_var_wifi_signal(0); // 获取信号强度失败，设为0
+        }
+    } else {
+        set_var_wifi_signal(0); // WiFi未连接，设为0
     }
 }

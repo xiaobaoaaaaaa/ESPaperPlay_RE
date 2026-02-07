@@ -257,6 +257,14 @@
         "defaultValue": "0",
         "persistent": false,
         "native": true
+      },
+      {
+        "objID": "08269a19-aed1-428c-dd18-eb0ca1ed888e",
+        "name": "wifi_signal",
+        "type": "integer",
+        "defaultValue": "0",
+        "persistent": false,
+        "native": true
       }
     ],
     "structures": [],
@@ -297,6 +305,15 @@
       "localVariables": [],
       "userProperties": [],
       "name": "get_weather_daily",
+      "implementationType": "native"
+    },
+    {
+      "objID": "24b3f1b8-8852-4554-b08b-223c37e159ab",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "get_signal_strength",
       "implementationType": "native"
     }
   ],
@@ -1057,6 +1074,32 @@
               "useStackType": "literal"
             }
           ]
+        },
+        {
+          "objID": "302e0379-5ea2-459b-8457-70590398da56",
+          "type": "CallActionActionComponent",
+          "left": -314,
+          "top": 140,
+          "width": 145,
+          "height": 24,
+          "customInputs": [],
+          "customOutputs": [],
+          "action": "get_signal_strength",
+          "userPropertyValues": {
+            "objID": "cfe00c40-0f8b-4302-b4ee-6490eb81b42c",
+            "values": {}
+          }
+        },
+        {
+          "objID": "0f803bb6-68f5-4a81-cdcf-59744a0a3307",
+          "type": "DelayActionComponent",
+          "left": -152,
+          "top": 137,
+          "width": 87,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "milliseconds": "5000"
         }
       ],
       "connectionLines": [
@@ -1079,6 +1122,27 @@
           "source": "f1342530-f1e8-4073-e308-3ae8430e6b11",
           "output": "@seqout",
           "target": "c28392bc-9d38-485e-ff91-6ac7bcf54d3e",
+          "input": "@seqin"
+        },
+        {
+          "objID": "66190087-374c-4c40-d7c5-5491a3252a9e",
+          "source": "f1342530-f1e8-4073-e308-3ae8430e6b11",
+          "output": "@seqout",
+          "target": "302e0379-5ea2-459b-8457-70590398da56",
+          "input": "@seqin"
+        },
+        {
+          "objID": "069642a5-eb73-4fba-b3d5-25c3f6157da2",
+          "source": "302e0379-5ea2-459b-8457-70590398da56",
+          "output": "@seqout",
+          "target": "0f803bb6-68f5-4a81-cdcf-59744a0a3307",
+          "input": "@seqin"
+        },
+        {
+          "objID": "fb58e76f-0879-4f2f-9c6e-bf9149cb722c",
+          "source": "0f803bb6-68f5-4a81-cdcf-59744a0a3307",
+          "output": "@seqout",
+          "target": "302e0379-5ea2-459b-8457-70590398da56",
           "input": "@seqin"
         }
       ],
@@ -5866,6 +5930,59 @@
           "heightUnit": "px",
           "children": [
             {
+              "objID": "36b07d5f-cb97-4c78-d7b4-784b08a0364f",
+              "type": "LVGLImageWidget",
+              "left": 0,
+              "top": 0,
+              "width": 14,
+              "height": 14,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "b8b88380-5969-4bcc-89b8-8dc5cd1a8400",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "wifi_signal",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "ADV_HITTEST|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "9c01820e-2e69-4d49-b72e-fed4f200b961",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "align": "RIGHT_MID"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "image": "signal_1",
+              "setPivot": false,
+              "pivotX": 0,
+              "pivotY": 0,
+              "zoom": 256,
+              "angle": 0,
+              "innerAlign": "CENTER"
+            },
+            {
               "objID": "f9c4da99-53da-42c3-e522-f547a82a8a1d",
               "type": "LVGLLabelWidget",
               "left": 0,
@@ -5941,9 +6058,200 @@
           },
           "group": "",
           "groupIndex": 0
+        },
+        {
+          "objID": "35742ac4-59a0-44a2-c72e-fcad8e639c78",
+          "type": "WatchVariableActionComponent",
+          "left": -62,
+          "top": -135,
+          "width": 141,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "variable": "wifi_signal"
+        },
+        {
+          "objID": "7da3f94f-3ef5-4861-a182-639bc1b3c812",
+          "type": "SwitchActionComponent",
+          "left": 111,
+          "top": -144,
+          "width": 197,
+          "height": 126,
+          "customInputs": [],
+          "customOutputs": [],
+          "tests": [
+            {
+              "objID": "a87005b4-124b-48de-fd3f-c823595c4270",
+              "condition": "wifi_signal==0",
+              "outputName": "set_signal_0"
+            },
+            {
+              "objID": "ea486ba5-7132-4ee6-a90c-95cf33d78493",
+              "condition": "wifi_signal==1",
+              "outputName": "set_signal_1"
+            },
+            {
+              "objID": "5ebd4d9d-836b-4a35-9b68-d7e5d30416a2",
+              "condition": "wifi_signal==2",
+              "outputName": "set_signal_2"
+            },
+            {
+              "objID": "96c73cb7-6f21-4bfa-bccb-a636f12dc508",
+              "condition": "wifi_signal==3",
+              "outputName": "set_signal_3"
+            },
+            {
+              "objID": "e3537ce8-4b33-41b1-ad9d-ac95016463da",
+              "condition": "wifi_signal==4",
+              "outputName": "set_signal_4"
+            }
+          ]
+        },
+        {
+          "objID": "b32f5bd9-2dcf-4d1a-b260-df599965a35a",
+          "type": "LVGLActionComponent",
+          "left": 368,
+          "top": -142,
+          "width": 224,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "actions": [
+            {
+              "objID": "9830020d-c27b-4186-b873-f2b46de5b108",
+              "action": "imageSetSrc",
+              "object": "wifi_signal",
+              "objectType": "literal",
+              "src": "signal_0",
+              "srcType": "literal"
+            }
+          ]
+        },
+        {
+          "objID": "caae5462-7674-4435-a0b5-7e23eea7b3f4",
+          "type": "LVGLActionComponent",
+          "left": 368,
+          "top": -89,
+          "width": 224,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "actions": [
+            {
+              "objID": "2d1f84ec-93f9-42b2-9542-63614785c0e3",
+              "action": "imageSetSrc",
+              "object": "wifi_signal",
+              "objectType": "literal",
+              "src": "signal_1",
+              "srcType": "literal"
+            }
+          ]
+        },
+        {
+          "objID": "30171910-5ad5-4cda-b839-3341d3b662a2",
+          "type": "LVGLActionComponent",
+          "left": 368,
+          "top": -36,
+          "width": 224,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "actions": [
+            {
+              "objID": "baca2dbc-7e29-44d0-d361-4e066f7407d6",
+              "action": "imageSetSrc",
+              "object": "wifi_signal",
+              "objectType": "literal",
+              "src": "signal_2",
+              "srcType": "literal"
+            }
+          ]
+        },
+        {
+          "objID": "be57a9e1-be7c-4bc0-e26f-72657e409e26",
+          "type": "LVGLActionComponent",
+          "left": 368,
+          "top": 17,
+          "width": 224,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "actions": [
+            {
+              "objID": "487eacf1-7a92-4f1c-b71b-cc3aefdd6ce5",
+              "action": "imageSetSrc",
+              "object": "wifi_signal",
+              "objectType": "literal",
+              "src": "signal_3",
+              "srcType": "literal"
+            }
+          ]
+        },
+        {
+          "objID": "fbbfaac7-68b0-45c4-ea7d-72cf94981c9f",
+          "type": "LVGLActionComponent",
+          "left": 368,
+          "top": 70,
+          "width": 224,
+          "height": 53,
+          "customInputs": [],
+          "customOutputs": [],
+          "actions": [
+            {
+              "objID": "74ed592c-4689-488f-af2c-d2e51b0dee96",
+              "action": "imageSetSrc",
+              "object": "wifi_signal",
+              "objectType": "literal",
+              "src": "signal_4",
+              "srcType": "literal"
+            }
+          ]
         }
       ],
-      "connectionLines": [],
+      "connectionLines": [
+        {
+          "objID": "dda693b4-3686-42f4-85f6-505d9af1c911",
+          "source": "35742ac4-59a0-44a2-c72e-fcad8e639c78",
+          "output": "variable",
+          "target": "7da3f94f-3ef5-4861-a182-639bc1b3c812",
+          "input": "@seqin"
+        },
+        {
+          "objID": "a071e98d-3ca9-4a53-d5ea-8b40f2428e83",
+          "source": "7da3f94f-3ef5-4861-a182-639bc1b3c812",
+          "output": "set_signal_0",
+          "target": "b32f5bd9-2dcf-4d1a-b260-df599965a35a",
+          "input": "@seqin"
+        },
+        {
+          "objID": "c6e0a7a8-d48f-494c-e99c-58f62c36fe0d",
+          "source": "7da3f94f-3ef5-4861-a182-639bc1b3c812",
+          "output": "set_signal_1",
+          "target": "caae5462-7674-4435-a0b5-7e23eea7b3f4",
+          "input": "@seqin"
+        },
+        {
+          "objID": "b2ddb9aa-da36-4b81-baf9-42593135141a",
+          "source": "7da3f94f-3ef5-4861-a182-639bc1b3c812",
+          "output": "set_signal_2",
+          "target": "30171910-5ad5-4cda-b839-3341d3b662a2",
+          "input": "@seqin"
+        },
+        {
+          "objID": "355795e3-ad4e-4f96-d11e-bfe42d0321b2",
+          "source": "7da3f94f-3ef5-4861-a182-639bc1b3c812",
+          "output": "set_signal_3",
+          "target": "be57a9e1-be7c-4bc0-e26f-72657e409e26",
+          "input": "@seqin"
+        },
+        {
+          "objID": "f43d85d8-568a-4cb3-afa7-e2f2594eff27",
+          "source": "7da3f94f-3ef5-4861-a182-639bc1b3c812",
+          "output": "set_signal_4",
+          "target": "fbbfaac7-68b0-45c4-ea7d-72cf94981c9f",
+          "input": "@seqin"
+        }
+      ],
       "localVariables": [],
       "userProperties": [],
       "name": "status_bar",
@@ -6082,6 +6390,51 @@
       "objID": "6f7d7fe6-0ac6-4218-d7e8-f1dc17e0cc64",
       "name": "weather_dew",
       "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB40lEQVR4AeyVi1HEMAxEDZVAJUAnUAlQCVAJUAlQCexzoomS+JeLZ5i7uRuvLcv6bGQldxn++XcmcDQVuFKrvAi/wpfwLqDTsm+0VIBEJL0fU7G/lbyFBPZAbvPRQuDRuXxLBloCRKhKaPhhB1amLQQ882tFAB9aGZBgLYHE2AHkmW0LARxxemUa4aswqrKLfwAvR4cWAtFww2S9Yi5Glr1VDjmiNwGekDKDmEDTg/A0AlniNHoTsMRUATJkogLPEoCW+ehJgITWL2S5YaqhJwGe1Of7cRvIAacaxN4EeEW5b+7avzVcDRiyurknAcJSBe56mZyrASsSNQI0E4FL8F/KlJ0vvZejbYkAxp7xZ/QYJi9DEtvhZD1TFdNu+g7wZ2OOdxJ8WZG5Z6lDsrRh+mFHXwDk6URSrgI8lY7jwHHFXCeQABIDJHJVoAL0BQjLX46At3vzm4Xsgza99wv/kCPgg9Fk9EIKnFlMqmBy85ojQNksCNdRgtn5xjRddc0ROChYNVvCIEeACqQaLxEiqrC1hoyK1qlEYPXKFIJusZ2FyRHAiCrwbWdlnwJnfCNYU+dVXYkAzgQmgf8WoKPk6CCIjO1BqBEgKAl53yFyIQVJkdFpu2+0ENiXoeJ9+gQqBQh/AAAA//9Ebn/tAAAABklEQVQDAN73T0G2WOJdAAAAAElFTkSuQmCC",
+      "bpp": 4,
+      "alwaysBuild": false,
+      "lvglBinaryOutputFormat": 3,
+      "lvglDither": false
+    },
+    {
+      "objID": "eb2a237e-9e9d-4e86-e744-56708b566d31",
+      "name": "signal_1",
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAA1klEQVR4AZzQ3RHCMAwD4MAksAlMAkwCTAKb0E1gE9DXu/SaFvpAL2r8I9mO1+XPb0m4Sc2KmO0ZC5FuST+Dd+B+jG45nIRKqcJzPMRc5ZrfNlgFbhAjUgh3Q3gMAfa5T8E9eAX1sLs48nKX2L2QA80oSU6PjkTQ6YhgFGKjIIhNobDOuMMbkfpAjEPgGH8XQ6Fa0LgJlUYoIEFgqzoQWBqxJeH0qKP2Tn4WobM77nAsbXAYU6GYtwIbiLyNPeCbUFJX21MAxBr8EiIR68aeYUk4I48DHwAAAP//HNR1EAAAAAZJREFUAwCDPygdWOISZQAAAABJRU5ErkJggg==",
+      "bpp": 4,
+      "alwaysBuild": false,
+      "lvglBinaryOutputFormat": 3,
+      "lvglDither": false
+    },
+    {
+      "objID": "5fc036b1-f6ba-4df2-c9d5-361ec2409cdb",
+      "name": "signal_2",
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAA0ElEQVR4AZzQ3RHCMAwD4MAkZRPYBCYBJoFN6CawCejjLr2EQh/oRbUjW/7Juvz5LQmH1KyI259WKOmS8D14BuytsWJyQpVShcfcJMaUc36bYBWwgCNSSO5AuE8C7GIPwTV4BPXwx1zExU7x30IX6EZJ0NGFBT4RjDoijUJsFAWM3e5pPLzOcqcdq5g1tup82OanC864uZZOiBCwE78FziNNXB21EhKMwlaO9WjshE+hgF2BD0R240/4JhTU1V4KAK7DL6EkYt34MywJZ8kt8QIAAP//RID0ugAAAAZJREFUAwDkASod4tB3xwAAAABJRU5ErkJggg==",
+      "bpp": 4,
+      "alwaysBuild": false,
+      "lvglBinaryOutputFormat": 3,
+      "lvglDither": false
+    },
+    {
+      "objID": "c033f8fa-bb83-48ef-cd00-05d1ee3278dd",
+      "name": "signal_3",
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAA0ElEQVR4AZzQ0RWCMAyFYXQS3EQ30UnUSXQT2UQ30fv1HLCA8CCnP0mT3CbttvnzWxO2ObMn7njVQkW3pJ/hHdhHZeXUJNQ0vfCcncKY5prfLmwCCzEiB6ltCY8pwCH2FO7BEttzQhfk5S7xi9AGRlGsM+x14LM6EaHTMQeU8XqxkcRqdC6CBI093DH7In5xFpAzbkn3HcsmPwkFcUdLzCMNwalQgVHYoSiOR4v5rqlQxl3BB5FX5Q/8Ekrq6jEcALERS0JFxLrxZ6wJZ8V14AMAAP//dU32MAAAAAZJREFUAwB4ISodLQtvOwAAAABJRU5ErkJggg==",
+      "bpp": 4,
+      "alwaysBuild": false,
+      "lvglBinaryOutputFormat": 3,
+      "lvglDither": false
+    },
+    {
+      "objID": "3d207dfe-15c5-4282-e2d7-1f7df8313c9e",
+      "name": "signal_4",
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAsElEQVR4AZzQiw0BARAE0ItK6IROqASV0Amd0AnzJHu5fy5kx87uzNzmbtP8+VsKbvPMQmi/ukGmW+RX8An0wiMzjSe0aSp4zsR0TG/F8Kp9CI2HdytoAdFW1SWuX/AeAmmrSvDpIvc1fxZpi/WMytu+Y+bG4o3MgHYorS7WTGCoubrdrgZ9GGSYunxi7mIYpPlQgIOQd8NbTAWJrvpYHgB2PcwFmYRdw0dYCo7M3cUXAAD//18cLzEAAAAGSURBVAMAXTgeHRI6Wz8AAAAASUVORK5CYII=",
+      "bpp": 4,
+      "alwaysBuild": false,
+      "lvglBinaryOutputFormat": 3,
+      "lvglDither": false
+    },
+    {
+      "objID": "a24e7f41-b12f-42e6-b482-ac2fcaef3fd1",
+      "name": "signal_0",
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAwklEQVR4AazRiw2CQBAEULQSrESpRK3EWAlaiXaineg8wkWIgomR3GTvZnf2x7L68fursE4Tu6ANDsEmwMW8zrCioEdct2AdlIO/5MEnYa5VRSgbB7IJuwj2PY6xuFVvS5Ka0EM7Aq4JmDp8YhRqCWU/JVpVZK6TZxvPPWgIYytiGb+JS+vdjIQwJx5u2PJGwjnxOU7L05ECb8L4R22rVOZmzdf9qjIjwRCymnkYbKN43MeKJYEgwd6WIhHgZ4UEk3gCAAD//9SVy9AAAAAGSURBVAMAb3ooHbIao84AAAAASUVORK5CYII=",
       "bpp": 4,
       "alwaysBuild": false,
       "lvglBinaryOutputFormat": 3,

@@ -14,6 +14,7 @@ typedef struct _objects_t {
     lv_obj_t *weather_daily;
     lv_obj_t *obj0;
     lv_obj_t *obj0__obj0;
+    lv_obj_t *obj0__wifi_signal;
     lv_obj_t *obj0__obj1;
     lv_obj_t *obj1;
     lv_obj_t *obj2;

@@ -33,6 +33,7 @@
 #include "lwip/sys.h"
 
 #include "config_manager.h"
+#include "vars.h"
 #include "wifi.h"
 
 /** @brief 日志标签 */
@@ -52,6 +53,9 @@
 static EventGroupHandle_t s_wifi_event_group;
 /** @brief 当前重试次数 */
 static int s_retry_num = 0;
+
+// WiFi 状态变量
+bool wifi_connected = false;
 
 /**
  * @brief SmartConfig 事件处理函数
@@ -138,6 +142,8 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t e
             esp_wifi_connect();
         }
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+        wifi_connected = false;
         // WiFi 断开连接，进行重试
         if (s_retry_num < MAXIMUM_RETRY) {
             esp_wifi_connect();
@@ -148,7 +154,9 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t e
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
         ESP_LOGI(TAG, "connect to the AP fail");
+        set_var_wifi_signal(0); // 设置信号强度为0，表示断开连接
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        wifi_connected = true;
         // 成功获取 IP 地址
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
@@ -173,6 +181,13 @@ static void start_smartconfig(void) {
     smartconfig_start_config_t cfg = SMARTCONFIG_START_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
 }
+
+/**
+ * @brief 获取 WiFi 连接状态
+ *
+ * @return true 如果已连接，否则返回 false
+ */
+bool is_wifi_connected() { return wifi_connected; }
 
 /**
  * @brief 初始化 WiFi STA 模式
