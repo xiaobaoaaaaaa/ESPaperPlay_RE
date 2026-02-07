@@ -7,6 +7,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include "config_manager.h"
 #include "ip_location.h"
 #include "weather.h"
 #include "yiyan.h"
@@ -193,37 +194,57 @@ void get_weather_task(void *pvParameters) {
     const char *TAG = "get_weather_task";
     location_t *location = NULL;
     weather_now_t *weather = NULL;
+    sys_config_t sys_config;
 
     while (1) {
+        config_manager_get_config(&sys_config);
+
         // 分配内存
-        if (location == NULL) {
-            location = heap_caps_malloc(sizeof(location_t), MALLOC_CAP_SPIRAM);
-        }
         if (weather == NULL) {
             weather = heap_caps_malloc(sizeof(weather_now_t), MALLOC_CAP_SPIRAM);
         }
 
-        if (location == NULL || weather == NULL) {
-            ESP_LOGE(TAG, "Failed to allocate memory");
+        // 如果没有配置城市，则使用IP定位，否则使用配置的城市名称
+        if (strlen(sys_config.weather.city) == 0) {
+            if (location == NULL) {
+                location = heap_caps_malloc(sizeof(location_t), MALLOC_CAP_SPIRAM);
+            }
+
+            if (location == NULL) {
+                ESP_LOGE(TAG, "Failed to allocate memory for location");
+                vTaskDelay(pdMS_TO_TICKS(WEATHER_INTERVAL_MS));
+                continue;
+            }
+        } else {
+            if (location != NULL) {
+                heap_caps_free(location);
+                location = NULL;
+            }
+        }
+
+        if (weather == NULL) {
+            ESP_LOGE(TAG, "Failed to allocate memory for weather");
             vTaskDelay(pdMS_TO_TICKS(WEATHER_INTERVAL_MS));
             continue;
         }
 
-        // 获取位置信息
-        esp_err_t err = get_location(NULL, location);
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
+        // 获取位置信息（仅在未配置城市时使用IP定位）
+        if (location != NULL) {
+            esp_err_t err = get_location(NULL, location);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
 
-            // 更新UI显示错误
-            set_var_weather_text("定位失败");
-            set_var_weather_uptime("未更新");
+                // 更新UI显示错误
+                set_var_weather_text("定位失败");
+                set_var_weather_uptime("未更新");
 
-            vTaskDelay(pdMS_TO_TICKS(WEATHER_INTERVAL_MS));
-            continue;
+                vTaskDelay(pdMS_TO_TICKS(WEATHER_INTERVAL_MS));
+                continue;
+            }
         }
 
         // 获取天气信息
-        err = get_weather_now(location, weather);
+        esp_err_t err = get_weather_now(location, weather);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "get_weather_now failed: %s", esp_err_to_name(err));
 
@@ -275,9 +296,12 @@ void get_weather_task(void *pvParameters) {
 
         snprintf(feelslike_str, sizeof(feelslike_str), "%.0f", weather->feelslike);
 
-        const char *district = (location->has_district && location->district[0] != '\0')
-                                   ? location->district
-                                   : (location->city[0] != '\0' ? location->city : "未知");
+        const char *district =
+            (location != NULL && location->has_district && location->district[0] != '\0')
+                ? location->district
+                : (location != NULL && location->city[0] != '\0'
+                       ? location->city
+                       : (sys_config.weather.city[0] != '\0' ? sys_config.weather.city : "未知"));
 
         // 通过变量更新UI
         set_var_weather_icon(icon_str);
@@ -400,26 +424,41 @@ static void update_daily_weather_ui(int day_index, weather_daily_t *daily, int8_
 
 void action_get_weather_daily(lv_event_t *e) {
     const char *TAG = "get_weather_daily";
+    location_t *location = NULL;
+    weather_forecast_t *forecast = NULL;
 
-    // 分配内存
-    location_t *location = heap_caps_malloc(sizeof(location_t), MALLOC_CAP_SPIRAM);
-    weather_forecast_t *forecast = heap_caps_malloc(sizeof(weather_forecast_t), MALLOC_CAP_SPIRAM);
+    sys_config_t sys_config;
+    config_manager_get_config(&sys_config);
 
-    if (location == NULL || forecast == NULL) {
-        ESP_LOGE(TAG, "Failed to allocate memory");
-        if (location)
+    esp_err_t err;
+
+    // 如果没有配置城市，则使用IP定位，否则使用配置的城市名称
+    if (strlen(sys_config.weather.city) == 0) {
+        // 分配内存
+        location = heap_caps_malloc(sizeof(location_t), MALLOC_CAP_SPIRAM);
+
+        if (location == NULL) {
+            ESP_LOGE(TAG, "Failed to allocate memory");
+            return;
+        }
+
+        // 获取位置信息
+        err = get_location(NULL, location);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
             heap_caps_free(location);
-        if (forecast)
-            heap_caps_free(forecast);
-        return;
+            return;
+        }
+    } else {
+        location = NULL;
     }
 
-    // 获取位置信息
-    esp_err_t err = get_location(NULL, location);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
-        heap_caps_free(location);
-        heap_caps_free(forecast);
+    forecast = heap_caps_malloc(sizeof(weather_forecast_t), MALLOC_CAP_SPIRAM);
+    if (forecast == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate memory for forecast");
+        if (location != NULL) {
+            heap_caps_free(location);
+        }
         return;
     }
 
@@ -427,8 +466,12 @@ void action_get_weather_daily(lv_event_t *e) {
     err = get_weather_forecast(location, 7, forecast);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "get_weather_forecast failed: %s", esp_err_to_name(err));
-        heap_caps_free(location);
-        heap_caps_free(forecast);
+        if (location != NULL) {
+            heap_caps_free(location);
+        }
+        if (forecast != NULL) {
+            heap_caps_free(forecast);
+        }
         return;
     }
 
