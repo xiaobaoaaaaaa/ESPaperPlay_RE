@@ -82,3 +82,6 @@ Desktop.ini
 
 # VSCode specific
 .vscode/
+
+#eim specific
+eim_config.toml
