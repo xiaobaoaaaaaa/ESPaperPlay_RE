@@ -5,10 +5,12 @@
 
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "freertos/task.h"
 
 #include "config_manager.h"
 #include "ip_location.h"
+#include "lvgl_init.h"
 #include "weather.h"
 #include "yiyan.h"
 
@@ -20,6 +22,7 @@
 
 TaskHandle_t get_yiyan_task_handle = NULL;
 TaskHandle_t get_weather_task_handle = NULL;
+TaskHandle_t get_weather_daily_task_handle = NULL;
 void get_yiyan_task(void *pvParameters) {
     while (1) {
         // 获取一言
@@ -422,117 +425,132 @@ static void update_daily_weather_ui(int day_index, weather_daily_t *daily, int8_
     lv_bar_set_value(temp_bar, daily->temp_max, LV_ANIM_OFF);
 }
 
-void action_get_weather_daily(lv_event_t *e) {
+void get_weather_daily_task(void *pvParameters) {
     const char *TAG = "get_weather_daily";
-    location_t *location = NULL;
-    weather_forecast_t *forecast = NULL;
 
-    sys_config_t sys_config;
-    config_manager_get_config(&sys_config);
+    while (1) {
+        location_t *location = NULL;
+        weather_forecast_t *forecast = NULL;
+        sys_config_t sys_config;
+        esp_err_t err;
 
-    esp_err_t err;
+        config_manager_get_config(&sys_config);
 
-    // 如果没有配置城市，则使用IP定位，否则使用配置的城市名称
-    if (strlen(sys_config.weather.city) == 0) {
-        // 分配内存
-        location = heap_caps_malloc(sizeof(location_t), MALLOC_CAP_SPIRAM);
+        // 如果没有配置城市，则使用IP定位，否则使用配置的城市名称
+        if (strlen(sys_config.weather.city) == 0) {
+            location = heap_caps_malloc(sizeof(location_t), MALLOC_CAP_SPIRAM);
+            if (location == NULL) {
+                ESP_LOGE(TAG, "Failed to allocate memory");
+                goto wait_for_next;
+            }
 
-        if (location == NULL) {
-            ESP_LOGE(TAG, "Failed to allocate memory");
-            return;
+            err = get_location(NULL, location);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
+                goto wait_for_next;
+            }
         }
 
-        // 获取位置信息
-        err = get_location(NULL, location);
+        forecast = heap_caps_malloc(sizeof(weather_forecast_t), MALLOC_CAP_SPIRAM);
+        if (forecast == NULL) {
+            ESP_LOGE(TAG, "Failed to allocate memory for forecast");
+            goto wait_for_next;
+        }
+
+        // 获取7天天气预报
+        err = get_weather_forecast(location, 7, forecast);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "get_location failed: %s", esp_err_to_name(err));
-            heap_caps_free(location);
-            return;
+            ESP_LOGE(TAG, "get_weather_forecast failed: %s", esp_err_to_name(err));
+            goto wait_for_next;
         }
-    } else {
-        location = NULL;
-    }
 
-    forecast = heap_caps_malloc(sizeof(weather_forecast_t), MALLOC_CAP_SPIRAM);
-    if (forecast == NULL) {
-        ESP_LOGE(TAG, "Failed to allocate memory for forecast");
-        if (location != NULL) {
-            heap_caps_free(location);
+        ESP_LOGI(TAG, "Weather forecast received: %d days", forecast->count);
+
+        // 计算7天内的全局最低温和最高温
+        int8_t global_temp_min = 127;
+        int8_t global_temp_max = -128;
+        for (int i = 0; i < forecast->count && i < 7; i++) {
+            if (forecast->daily[i].temp_min < global_temp_min) {
+                global_temp_min = forecast->daily[i].temp_min;
+            }
+            if (forecast->daily[i].temp_max > global_temp_max) {
+                global_temp_max = forecast->daily[i].temp_max;
+            }
         }
-        return;
-    }
 
-    // 获取7天天气预报
-    err = get_weather_forecast(location, 7, forecast);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "get_weather_forecast failed: %s", esp_err_to_name(err));
+        ESP_LOGI(TAG, "Global temp range: %d ~ %d", global_temp_min, global_temp_max);
+
+        // 定义UI组件数组，方便遍历更新
+        struct {
+            lv_obj_t **date_label;
+            lv_obj_t **icon_label;
+            lv_obj_t **temp_min_label;
+            lv_obj_t **temp_max_label;
+            lv_obj_t **temp_bar;
+        } daily_ui[7] = {
+            {&objects.weather_daily_date1, &objects.weather_daily_icon1,
+             &objects.weather_daily_temp_min1, &objects.weather_daily_temp_max1,
+             &objects.weather_daily_temp_bar1},
+            {&objects.weather_daily_date2, &objects.weather_daily_icon2,
+             &objects.weather_daily_temp_min2, &objects.weather_daily_temp_max2,
+             &objects.weather_daily_temp_bar2},
+            {&objects.weather_daily_date3, &objects.weather_daily_icon3,
+             &objects.weather_daily_temp_min3, &objects.weather_daily_temp_max3,
+             &objects.weather_daily_temp_bar3},
+            {&objects.weather_daily_date4, &objects.weather_daily_icon4,
+             &objects.weather_daily_temp_min4, &objects.weather_daily_temp_max4,
+             &objects.weather_daily_temp_bar4},
+            {&objects.weather_daily_date5, &objects.weather_daily_icon5,
+             &objects.weather_daily_temp_min5, &objects.weather_daily_temp_max5,
+             &objects.weather_daily_temp_bar5},
+            {&objects.weather_daily_date6, &objects.weather_daily_icon6,
+             &objects.weather_daily_temp_min6, &objects.weather_daily_temp_max6,
+             &objects.weather_daily_temp_bar6},
+            {&objects.weather_daily_date7, &objects.weather_daily_icon7,
+             &objects.weather_daily_temp_min7, &objects.weather_daily_temp_max7,
+             &objects.weather_daily_temp_bar7},
+        };
+
+        // 更新每天的UI（线程安全）
+        SemaphoreHandle_t lvgl_mutex = lvgl_get_mutex();
+        if (lvgl_mutex != NULL) {
+            xSemaphoreTake(lvgl_mutex, portMAX_DELAY);
+        }
+
+        for (int i = 0; i < forecast->count && i < 7; i++) {
+            if (*daily_ui[i].date_label != NULL) {
+                update_daily_weather_ui(i, &forecast->daily[i], global_temp_min, global_temp_max,
+                                        *daily_ui[i].date_label, *daily_ui[i].icon_label,
+                                        *daily_ui[i].temp_min_label, *daily_ui[i].temp_max_label,
+                                        *daily_ui[i].temp_bar);
+            }
+        }
+
+        if (lvgl_mutex != NULL) {
+            xSemaphoreGive(lvgl_mutex);
+        }
+
+    wait_for_next:
         if (location != NULL) {
             heap_caps_free(location);
         }
         if (forecast != NULL) {
             heap_caps_free(forecast);
         }
-        return;
+
+        // 等待下一次触发
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
     }
 
-    ESP_LOGI(TAG, "Weather forecast received: %d days", forecast->count);
+    get_weather_daily_task_handle = NULL;
+    vTaskDelete(NULL);
+}
 
-    // 计算7天内的全局最低温和最高温
-    int8_t global_temp_min = 127;
-    int8_t global_temp_max = -128;
-    for (int i = 0; i < forecast->count && i < 7; i++) {
-        if (forecast->daily[i].temp_min < global_temp_min) {
-            global_temp_min = forecast->daily[i].temp_min;
-        }
-        if (forecast->daily[i].temp_max > global_temp_max) {
-            global_temp_max = forecast->daily[i].temp_max;
-        }
+void action_get_weather_daily(lv_event_t *e) {
+    if (get_weather_daily_task_handle == NULL) {
+        xTaskCreate(get_weather_daily_task, "get_weather_daily_task", 8192, NULL, 5,
+                    &get_weather_daily_task_handle);
+    } else {
+        xTaskNotifyGive(get_weather_daily_task_handle);
     }
-
-    ESP_LOGI(TAG, "Global temp range: %d ~ %d", global_temp_min, global_temp_max);
-
-    // 定义UI组件数组，方便遍历更新
-    struct {
-        lv_obj_t **date_label;
-        lv_obj_t **icon_label;
-        lv_obj_t **temp_min_label;
-        lv_obj_t **temp_max_label;
-        lv_obj_t **temp_bar;
-    } daily_ui[7] = {
-        {&objects.weather_daily_date1, &objects.weather_daily_icon1,
-         &objects.weather_daily_temp_min1, &objects.weather_daily_temp_max1,
-         &objects.weather_daily_temp_bar1},
-        {&objects.weather_daily_date2, &objects.weather_daily_icon2,
-         &objects.weather_daily_temp_min2, &objects.weather_daily_temp_max2,
-         &objects.weather_daily_temp_bar2},
-        {&objects.weather_daily_date3, &objects.weather_daily_icon3,
-         &objects.weather_daily_temp_min3, &objects.weather_daily_temp_max3,
-         &objects.weather_daily_temp_bar3},
-        {&objects.weather_daily_date4, &objects.weather_daily_icon4,
-         &objects.weather_daily_temp_min4, &objects.weather_daily_temp_max4,
-         &objects.weather_daily_temp_bar4},
-        {&objects.weather_daily_date5, &objects.weather_daily_icon5,
-         &objects.weather_daily_temp_min5, &objects.weather_daily_temp_max5,
-         &objects.weather_daily_temp_bar5},
-        {&objects.weather_daily_date6, &objects.weather_daily_icon6,
-         &objects.weather_daily_temp_min6, &objects.weather_daily_temp_max6,
-         &objects.weather_daily_temp_bar6},
-        {&objects.weather_daily_date7, &objects.weather_daily_icon7,
-         &objects.weather_daily_temp_min7, &objects.weather_daily_temp_max7,
-         &objects.weather_daily_temp_bar7},
-    };
-
-    // 更新每天的UI
-    for (int i = 0; i < forecast->count && i < 7; i++) {
-        if (*daily_ui[i].date_label != NULL) {
-            update_daily_weather_ui(i, &forecast->daily[i], global_temp_min, global_temp_max,
-                                    *daily_ui[i].date_label, *daily_ui[i].icon_label,
-                                    *daily_ui[i].temp_min_label, *daily_ui[i].temp_max_label,
-                                    *daily_ui[i].temp_bar);
-        }
-    }
-
-    // 释放内存
-    heap_caps_free(location);
-    heap_caps_free(forecast);
 }
