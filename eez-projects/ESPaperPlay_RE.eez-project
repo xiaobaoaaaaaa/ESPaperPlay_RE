@@ -1813,9 +1813,9 @@
                 {
                   "objID": "a24955c8-1f87-439f-d93c-6314606ce309",
                   "type": "LVGLLabelWidget",
-                  "left": 19,
-                  "top": -24,
-                  "width": 334,
+                  "left": 18,
+                  "top": -19,
+                  "width": 298,
                   "height": 20,
                   "customInputs": [],
                   "customOutputs": [],
@@ -1856,7 +1856,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "weather_windDir+\"风\"+weather_windScale+\"级\"",
+                  "text": "weather_windDir+weather_windScale+\"级\"",
                   "textType": "expression",
                   "longMode": "WRAP",
                   "recolor": false
@@ -2048,8 +2048,8 @@
                 {
                   "objID": "cbc0e2a0-989c-4b83-dc2a-5ceba802d7af",
                   "type": "LVGLLabelWidget",
-                  "left": -52,
-                  "top": 12,
+                  "left": 17,
+                  "top": -57,
                   "width": 391,
                   "height": 52,
                   "customInputs": [],
@@ -2084,7 +2084,7 @@
                         "DEFAULT": {
                           "text_color": "#000000",
                           "text_font": "MONTSERRAT_48",
-                          "align": "TOP_RIGHT"
+                          "align": "CENTER"
                         }
                       }
                     }
@@ -3457,7 +3457,7 @@
           "left": 234,
           "top": 239,
           "width": 354,
-          "height": 54,
+          "height": 53,
           "customInputs": [],
           "customOutputs": [],
           "actions": [
