@@ -23,6 +23,10 @@ set(EPAPER_SRCS
     "src/hardware/display/epaper.c"
 )
 
+set(AUDIO_SRCS
+    "src/hardware/audio/audio.c"
+)
+
 set(LVGL_SRCS
     "src/lvgl/lvgl_init.c"
     "src/lvgl/lv_port_disp.c"
@@ -40,6 +44,7 @@ file(GLOB UI_ACTION_FILES "src/ui/actions/*.c")
 set(HARDWARE_SRCS
     ${TP_SRCS}
     ${EPAPER_SRCS}
+    ${AUDIO_SRCS}
 )
 
 set(SERVICES_SRCS
