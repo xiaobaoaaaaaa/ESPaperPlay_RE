@@ -1,62 +1,20 @@
 #include "actions.h"
-#include "eez-flow.h"
 #include "screens.h"
 #include "vars.h"
 
 #include "esp_log.h"
-#include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
 #include "freertos/task.h"
 
 #include "config_manager.h"
 #include "ip_location.h"
 #include "lvgl_init.h"
 #include "weather.h"
-#include "wifi.h"
-#include "yiyan.h"
 
-#include <sys/time.h>
-#include <time.h>
-
-#define YIYAN_INTERVAL_MS (3 * 60 * 1000)    // 3分钟
 #define WEATHER_INTERVAL_MS (10 * 60 * 1000) // 10分钟
 
-TaskHandle_t get_yiyan_task_handle = NULL;
 TaskHandle_t get_weather_task_handle = NULL;
 TaskHandle_t get_weather_daily_task_handle = NULL;
-void get_yiyan_task(void *pvParameters) {
-    while (1) {
-        // 获取一言
-        char *yiyan_str = NULL;
-        esp_err_t ret = get_yiyan(&yiyan_str);
-        if (ret == ESP_OK && yiyan_str != NULL) {
-            set_var_yiyan(yiyan_str);
-            free(yiyan_str);
-        } else {
-            set_var_yiyan("获取一言失败");
-            ESP_LOGE("get_yiyan_task", "get_yiyan failed with error: %s", esp_err_to_name(ret));
-        }
-
-        // 等待3分钟或收到立即执行的通知
-        // ulTaskNotifyTake 会阻塞直到收到通知或超时
-        ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(YIYAN_INTERVAL_MS));
-    }
-
-    // 正常情况下不会执行到这里，但为了安全起见保留
-    get_yiyan_task_handle = NULL;
-    vTaskDelete(NULL);
-}
-
-void action_get_yiyan(lv_event_t *e) {
-    if (get_yiyan_task_handle == NULL) {
-        // 任务不存在，创建新任务
-        xTaskCreate(get_yiyan_task, "get_yiyan_task", 4096, NULL, 5, &get_yiyan_task_handle);
-    } else {
-        // 任务已存在，通知任务立即执行
-        xTaskNotifyGive(get_yiyan_task_handle);
-    }
-}
 
 /**
  * @brief 将和风天气图标代码转换为Unicode字符
@@ -350,16 +308,6 @@ void action_get_weather(lv_event_t *e) {
     }
 }
 
-void action_change_to_previous_screen(lv_event_t *e) {
-    // 获取gesture方向
-    lv_dir_t dir = lv_indev_get_gesture_dir(lv_event_get_indev(e));
-    if (dir == LV_DIR_RIGHT) {
-        // 左滑，返回上一个屏幕，使用 eez flow 屏幕栈管理
-        ESP_LOGI("screen_change", "Popping screen with eez_flow");
-        eez_flow_pop_screen(LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
-    }
-}
-
 /**
  * @brief 格式化日期为"今天"、"明天"、"周X"
  */
@@ -554,32 +502,5 @@ void action_get_weather_daily(lv_event_t *e) {
                     &get_weather_daily_task_handle);
     } else {
         xTaskNotifyGive(get_weather_daily_task_handle);
-    }
-}
-
-void action_get_signal_strength(lv_event_t *e) {
-    if (is_wifi_connected()) {
-        wifi_ap_record_t ap_info;
-        if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK) {
-            switch (ap_info.rssi) {
-            case -60 ... 0:
-                set_var_wifi_signal(4);
-                break;
-            case -67 ... - 61:
-                set_var_wifi_signal(3);
-                break;
-            case -75 ... - 68:
-                set_var_wifi_signal(2);
-                break;
-
-            default:
-                set_var_wifi_signal(1);
-                break;
-            }
-        } else {
-            set_var_wifi_signal(0); // 获取信号强度失败，设为0
-        }
-    } else {
-        set_var_wifi_signal(0); // WiFi未连接，设为0
     }
 }

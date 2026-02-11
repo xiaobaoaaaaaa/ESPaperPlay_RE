@@ -35,6 +35,7 @@ file(GLOB UI_CPP_FILES "src/ui/*.cpp")
 file(GLOB UI_C_FILES "src/ui/*.c")
 file(GLOB UI_IMG_FILES "src/ui/images/*.c")
 file(GLOB UI_FONT_FILES "src/ui/fonts/*.c")
+file(GLOB UI_ACTION_FILES "src/ui/actions/*.c")
 
 set(HARDWARE_SRCS
     ${TP_SRCS}
@@ -63,6 +64,7 @@ set(ALL_SRCS
     ${UI_CPP_FILES}
     ${UI_C_FILES}
     ${UI_FONT_FILES}
+    ${UI_ACTION_FILES}
 )
 
 idf_component_register(SRCS ${ALL_SRCS}
