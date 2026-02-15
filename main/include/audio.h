@@ -5,3 +5,4 @@
 #include <stddef.h>
 
 void i2s_init_std_simplex(void);
+void audio_start_pcm_test(void);
