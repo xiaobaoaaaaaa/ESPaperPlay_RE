@@ -27,6 +27,10 @@ set(AUDIO_SRCS
     "src/hardware/audio/audio.c"
 )
 
+set(SD_CARD_SRCS
+    "src/hardware/sdcard/sdcard.c"
+)
+
 set(LVGL_SRCS
     "src/lvgl/lvgl_init.c"
     "src/lvgl/lv_port_disp.c"
@@ -45,6 +49,7 @@ set(HARDWARE_SRCS
     ${TP_SRCS}
     ${EPAPER_SRCS}
     ${AUDIO_SRCS}
+    ${SD_CARD_SRCS}
 )
 
 set(SERVICES_SRCS

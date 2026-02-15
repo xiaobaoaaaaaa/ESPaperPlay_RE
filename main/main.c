@@ -15,6 +15,7 @@
 #include "freertos/task.h"
 #include "ip_location.h"
 #include "lvgl_init.h"
+#include "sdcard.h"
 #include "sntp.h"
 #include "weather.h"
 #include "webserver.h"
@@ -60,6 +61,13 @@ void app_main(void) {
         return;
     }
     ESP_LOGI(TAG, "FATFS挂载成功，挂载点为 /flash");
+
+    // 初始化 SD 卡
+    err = sdcard_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "sdcard_init failed: %s", esp_err_to_name(err));
+        return;
+    }
 
     // 初始化配置管理器
     esp_err_t ret = config_manager_init();
