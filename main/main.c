@@ -26,43 +26,6 @@
 static wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
 static EventGroupHandle_t s_init_event_group = NULL;
 
-static void audio_pcm_test_play_task(void *param) {
-    ESP_LOGI(TAG, "Audio test: playing 440Hz sine wave...");
-    vTaskDelay(pdMS_TO_TICKS(200));
-
-    const int sample_rate = 44100;
-    const int duration_ms = 5000;
-    const int frequency_hz = 880;
-    const float amplitude = 0.2f;
-    const int chunk_samples = 480;
-    const float two_pi = 6.2831853f;
-
-    int total_samples = (sample_rate * duration_ms) / 1000;
-    int16_t buffer[chunk_samples];
-
-    for (int offset = 0; offset < total_samples; offset += chunk_samples) {
-        int count = chunk_samples;
-        if (offset + count > total_samples) {
-            count = total_samples - offset;
-        }
-        for (int i = 0; i < count; ++i) {
-            float t = (float)(offset + i) / (float)sample_rate;
-            float sample = sinf(two_pi * (float)frequency_hz * t);
-            buffer[i] = (int16_t)(sample * amplitude * 32767.0f);
-        }
-
-        esp_err_t err = audio_write(buffer, count * sizeof(int16_t));
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "audio_write failed: %s", esp_err_to_name(err));
-            break;
-        }
-        vTaskDelay(1); // 让出 CPU，避免看门狗超时
-    }
-
-    ESP_LOGI(TAG, "Audio test: done");
-    vTaskDelete(NULL);
-}
-
 void wifi_and_time_init_task(void *pvParameter) {
     // 初始化 WiFi
     wifi_init();
@@ -106,8 +69,7 @@ void app_main(void) {
     }
 
     // 初始化音频
-    audio_init();
-    xTaskCreate(audio_pcm_test_play_task, "audio_pcm_test_play_task", 8192, NULL, 5, NULL);
+    i2s_init_std_simplex();
 
     s_init_event_group = xEventGroupCreate();
     if (s_init_event_group == NULL) {

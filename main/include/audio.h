@@ -1,7 +1,7 @@
 #pragma once
 
+#include "driver/i2s_std.h"
 #include "esp_err.h"
 #include <stddef.h>
 
-void audio_init();
-esp_err_t audio_write(const void *data, size_t data_size);
+void i2s_init_std_simplex(void);
