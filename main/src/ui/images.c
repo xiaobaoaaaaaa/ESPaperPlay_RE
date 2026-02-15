@@ -1,6 +1,6 @@
 #include "images.h"
 
-const ext_img_desc_t images[11] = {
+const ext_img_desc_t images[12] = {
     { "weaher_pressure", &img_weaher_pressure },
     { "weather_precip", &img_weather_precip },
     { "weather_humidity", &img_weather_humidity },
@@ -12,4 +12,5 @@ const ext_img_desc_t images[11] = {
     { "signal_3", &img_signal_3 },
     { "signal_4", &img_signal_4 },
     { "signal_0", &img_signal_0 },
+    { "Settings", &img_settings },
 };
