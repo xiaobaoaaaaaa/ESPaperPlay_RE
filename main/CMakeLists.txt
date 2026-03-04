@@ -81,10 +81,10 @@ idf_component_register(SRCS ${ALL_SRCS}
 # 创建静态文件系统，用于在 SPI Flash 上存储 FATFS 文件系统镜像
 # 若需更新静态文件系统镜像，请取消以下代码的注释并重新编译项目
 
-set(image ../fatfs_image)
+# set(image ../fatfs_image)
 
-if(CONFIG_EXAMPLE_FATFS_MODE_READ_ONLY)
-    fatfs_create_rawflash_image(storage ${image} FLASH_IN_PROJECT PRESERVE_TIME)
-else()
-    fatfs_create_spiflash_image(storage ${image} FLASH_IN_PROJECT PRESERVE_TIME)
-endif()
+# if(CONFIG_EXAMPLE_FATFS_MODE_READ_ONLY)
+#     fatfs_create_rawflash_image(storage ${image} FLASH_IN_PROJECT PRESERVE_TIME)
+# else()
+#     fatfs_create_spiflash_image(storage ${image} FLASH_IN_PROJECT PRESERVE_TIME)
+# endif()
