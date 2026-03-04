@@ -1,5 +1,8 @@
+#include "esp_log.h"
 #include "esp_rom_sys.h"
 #include "esp_vfs_fat.h"
+#include <dirent.h>
+#include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/unistd.h>
@@ -12,6 +15,9 @@
 #define SD_PIN_CLK GPIO_NUM_8
 
 #define MOUNT_POINT "/sdcard"
+
+static const char *TAG = "sdcard";
+bool sdcard_mounted = false;
 
 static void sdcard_spi_wakeup(void) {
     gpio_set_direction(SD_PIN_CS, GPIO_MODE_OUTPUT);
@@ -72,5 +78,36 @@ esp_err_t sdcard_init(void) {
     if (ret != ESP_OK) {
         return ret;
     }
+    sdcard_mounted = true;
+    return ESP_OK;
+}
+
+esp_err_t sdcard_list_root(void) {
+    DIR *dir = opendir(MOUNT_POINT);
+    if (!dir) {
+        ESP_LOGE(TAG, "open %s failed: errno=%d", MOUNT_POINT, errno);
+        return ESP_FAIL;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        char path[256];
+        int written = snprintf(path, sizeof(path), "%s/%s", MOUNT_POINT, entry->d_name);
+        if (written < 0 || written >= (int)sizeof(path)) {
+            ESP_LOGW(TAG, "skip long path: %s", entry->d_name);
+            continue;
+        }
+
+        struct stat st;
+        if (stat(path, &st) == 0) {
+            bool is_dir = S_ISDIR(st.st_mode);
+            ESP_LOGI(TAG, "%s %s (%ld bytes)", is_dir ? "<DIR>" : "FILE", entry->d_name,
+                     (long)st.st_size);
+        } else {
+            ESP_LOGW(TAG, "stat failed for %s: errno=%d", path, errno);
+        }
+    }
+
+    closedir(dir);
     return ESP_OK;
 }

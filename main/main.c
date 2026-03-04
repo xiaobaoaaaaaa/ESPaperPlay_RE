@@ -68,6 +68,9 @@ void app_main(void) {
         ESP_LOGE(TAG, "sdcard_init failed: %s", esp_err_to_name(err));
         return;
     }
+    if (sdcard_mounted) {
+        ESP_LOGI(TAG, "SD 卡已挂载");
+    }
 
     // 初始化配置管理器
     esp_err_t ret = config_manager_init();
