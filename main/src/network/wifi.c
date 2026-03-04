@@ -27,6 +27,7 @@
 #include "freertos/task.h"
 #include "nvs_flash.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "lwip/err.h"
@@ -82,17 +83,21 @@ static void smartconfig_event_handler(void *arg, esp_event_base_t event_base, in
         ESP_LOGI(TAG, "Got SSID and password");
 
         smartconfig_event_got_ssid_pswd_t *evt = (smartconfig_event_got_ssid_pswd_t *)event_data;
-        wifi_config_t wifi_config;
+        wifi_config_t *wifi_config = calloc(1, sizeof(wifi_config_t));
         uint8_t ssid[33] = {0};
         uint8_t password[65] = {0};
 
+        if (wifi_config == NULL) {
+            ESP_LOGE(TAG, "Failed to allocate wifi_config");
+            return;
+        }
+
         // 清空并配置 WiFi 配置结构
-        bzero(&wifi_config, sizeof(wifi_config_t));
-        memcpy(wifi_config.sta.ssid, evt->ssid, sizeof(wifi_config.sta.ssid));
-        memcpy(wifi_config.sta.password, evt->password, sizeof(wifi_config.sta.password));
-        wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
-        wifi_config.sta.pmf_cfg.capable = true;
-        wifi_config.sta.pmf_cfg.required = false;
+        memcpy(wifi_config->sta.ssid, evt->ssid, sizeof(wifi_config->sta.ssid));
+        memcpy(wifi_config->sta.password, evt->password, sizeof(wifi_config->sta.password));
+        wifi_config->sta.threshold.authmode = WIFI_AUTH_OPEN;
+        wifi_config->sta.pmf_cfg.capable = true;
+        wifi_config->sta.pmf_cfg.required = false;
 
         memcpy(ssid, evt->ssid, sizeof(evt->ssid));
         memcpy(password, evt->password, sizeof(evt->password));
@@ -100,19 +105,30 @@ static void smartconfig_event_handler(void *arg, esp_event_base_t event_base, in
         ESP_LOGI(TAG, "PASSWORD:%s", password);
 
         // 保存配置到系统存储
-        sys_config_t sys_config;
-        config_manager_get_config(&sys_config);
-        memset(sys_config.wifi.ssid, 0, sizeof(sys_config.wifi.ssid));
-        memset(sys_config.wifi.password, 0, sizeof(sys_config.wifi.password));
-        memcpy(sys_config.wifi.ssid, ssid, strlen((char *)ssid));
-        memcpy(sys_config.wifi.password, password, strlen((char *)password));
-        config_manager_save_config(&sys_config);
+        sys_config_t *sys_config = calloc(1, sizeof(sys_config_t));
+        if (sys_config == NULL) {
+            ESP_LOGE(TAG, "Failed to allocate sys_config");
+            free(wifi_config);
+            return;
+        }
+        config_manager_get_config(sys_config);
+        memset(sys_config->wifi.ssid, 0, sizeof(sys_config->wifi.ssid));
+        memset(sys_config->wifi.password, 0, sizeof(sys_config->wifi.password));
+        memcpy(sys_config->wifi.ssid, ssid, strlen((char *)ssid));
+        memcpy(sys_config->wifi.password, password, strlen((char *)password));
+        esp_err_t save_err = config_manager_save_config(sys_config);
+        if (save_err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to save WiFi config: %s", esp_err_to_name(save_err));
+        }
 
         // 断开现有连接并设置新的 WiFi 配置
         ESP_ERROR_CHECK(esp_wifi_disconnect());
-        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_config));
         s_retry_num = 0; // 重置重试次数
         esp_wifi_connect();
+
+        free(sys_config);
+        free(wifi_config);
     } else if (event_base == SC_EVENT && event_id == SC_EVENT_SEND_ACK_DONE) {
         // SmartConfig 已发送确认
         xEventGroupSetBits(s_wifi_event_group, ESPTOUCH_DONE_BIT);
@@ -136,11 +152,18 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t e
                                void *event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         // STA 启动，尝试连接到已保存的 WiFi 网络
-        sys_config_t sys_config;
-        config_manager_get_config(&sys_config);
-        if (strcmp(sys_config.wifi.ssid, "DefaultSSID") != 0 && strlen(sys_config.wifi.ssid) > 0) {
+        sys_config_t *sys_config = calloc(1, sizeof(sys_config_t));
+        if (sys_config == NULL) {
+            ESP_LOGE(TAG, "Failed to allocate sys_config");
+            return;
+        }
+
+        config_manager_get_config(sys_config);
+        if (strcmp(sys_config->wifi.ssid, "DefaultSSID") != 0 &&
+            strlen(sys_config->wifi.ssid) > 0) {
             esp_wifi_connect();
         }
+        free(sys_config);
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
         wifi_connected = false;
