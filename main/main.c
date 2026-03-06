@@ -49,11 +49,6 @@ void lvgl_init_task(void *param) {
     vTaskDelete(NULL);
 }
 
-void audio_test_task(void *param) {
-    music_play_file_from_sdcard("/sdcard/test.mp3");
-    vTaskDelete(NULL);
-}
-
 void app_main(void) {
     // 初始化 FATFS
     esp_vfs_fat_mount_config_t mount_config = {.format_if_mount_failed = true,
@@ -87,7 +82,6 @@ void app_main(void) {
 
     // 初始化音频
     i2s_init_std_simplex();
-    xTaskCreate(audio_test_task, "audio_test_task", 4096, NULL, 5, NULL);
 
     s_init_event_group = xEventGroupCreate();
     if (s_init_event_group == NULL) {
