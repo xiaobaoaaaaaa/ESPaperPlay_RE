@@ -1,6 +1,8 @@
+#include "driver/sdmmc_host.h"
 #include "esp_log.h"
 #include "esp_rom_sys.h"
 #include "esp_vfs_fat.h"
+#include "sdmmc_cmd.h"
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
@@ -9,76 +11,61 @@
 
 #include "sdcard.h"
 
-#define SD_PIN_CS GPIO_NUM_13
-#define SD_PIN_MOSI GPIO_NUM_14
-#define SD_PIN_MISO GPIO_NUM_5
-#define SD_PIN_CLK GPIO_NUM_8
+#define SDMMC_FREQ 10000
 
 #define MOUNT_POINT "/sdcard"
 
 static const char *TAG = "sdcard";
 bool sdcard_mounted = false;
-
-static void sdcard_spi_wakeup(void) {
-    gpio_set_direction(SD_PIN_CS, GPIO_MODE_OUTPUT);
-    gpio_set_level(SD_PIN_CS, 1); // CS 必须为高！
-
-    gpio_set_direction(SD_PIN_CLK, GPIO_MODE_OUTPUT);
-    gpio_set_direction(SD_PIN_MOSI, GPIO_MODE_OUTPUT);
-    gpio_set_direction(SD_PIN_MISO, GPIO_MODE_INPUT);
-
-    // MOSI 拉高（规范要求）
-    gpio_set_level(SD_PIN_MOSI, 1);
-
-    // 发送 >=74 clocks，给 80
-    for (int i = 0; i < 80; i++) {
-        gpio_set_level(SD_PIN_CLK, 0);
-        esp_rom_delay_us(1);
-        gpio_set_level(SD_PIN_CLK, 1);
-        esp_rom_delay_us(1);
-    }
-}
+sdmmc_card_t *card = NULL;
 
 esp_err_t sdcard_init(void) {
-    sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-    host.slot = SPI3_HOST;
-    host.max_freq_khz = SDMMC_FREQ_PROBING;
-
-    spi_bus_config_t bus_cfg = {
-        .mosi_io_num = SD_PIN_MOSI,
-        .miso_io_num = SD_PIN_MISO,
-        .sclk_io_num = SD_PIN_CLK,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .max_transfer_sz = 4096,
-    };
-    esp_err_t ret = spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA);
-    if (ret != ESP_OK) {
-        return ret;
+    if (sdcard_mounted) {
+        ESP_LOGI(TAG, "SD card already mounted at %s", MOUNT_POINT);
+        return ESP_OK;
     }
 
-    // sdcard_spi_wakeup();
-    vTaskDelay(pdMS_TO_TICKS(50));
+    esp_err_t ret;
 
-    static sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
-    slot_config.host_id = host.slot;
-    slot_config.gpio_cs = SD_PIN_CS;
-
-    sdmmc_card_t *card;
+    // 1. 配置挂载选项
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-        .format_if_mount_failed = true,
-        .max_files = 5,
-        .allocation_unit_size = 16 * 1024,
+        .format_if_mount_failed = false,  // 挂载失败时不格式化 SD 卡，直接返回错误
+        .max_files = 5,                   // 最大同时打开文件数
+        .allocation_unit_size = 16 * 1024 // 分配单元大小
     };
-    ret = esp_vfs_fat_sdspi_mount(MOUNT_POINT, &host, &slot_config, &mount_config, &card);
+
+    ESP_LOGI("SDMMC", "Initializing SD card using SDMMC peripheral");
+
+    // 2. 配置SDMMC主机，使用默认配置
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+
+    // 3. 配置SDMMC插槽，包括引脚和总线宽度
+    sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    slot_config.width = 1; // 使用1线模式。
+
+    // 4. 执行挂载操作
+    ret = esp_vfs_fat_sdmmc_mount(MOUNT_POINT, &host, &slot_config, &mount_config, &card);
+
     if (ret != ESP_OK) {
+        sdcard_mounted = false;
+        card = NULL;
+        if (ret == ESP_FAIL) {
+            ESP_LOGE("SDMMC",
+                     "Failed to mount filesystem. "
+                     "If you want the card to be formatted, set format_if_mount_failed = true.");
+        } else {
+            ESP_LOGE("SDMMC",
+                     "Failed to initialize the card (%s). "
+                     "Make sure SD card lines have pull-up resistors in place.",
+                     esp_err_to_name(ret));
+        }
         return ret;
     }
-    ret = sdspi_host_set_card_clk(host.slot, 15000); // 20MHz
-    if (ret != ESP_OK) {
-        return ret;
-    }
+
+    // 5. 挂载成功，打印SD卡信息
     sdcard_mounted = true;
+    ESP_LOGI("SDMMC", "Filesystem mounted successfully");
+    sdmmc_card_print_info(stdout, card);
     return ESP_OK;
 }
 

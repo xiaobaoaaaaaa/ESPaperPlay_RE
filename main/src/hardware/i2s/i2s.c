@@ -17,7 +17,7 @@
 
 #define PCM_RAW_CHUNK_BYTES 2048
 #define PCM_CHUNK_COUNT 6
-#define SAMPLE_RATE 48000
+#define SAMPLE_RATE 16000
 #define PCM_FILE_PATH_DEFAULT "/sdcard/o.pcm"
 
 #define PCM_READER_TASK_STACK 8192
@@ -48,7 +48,6 @@ void i2s_init_std_simplex(void) {
         return;
     }
     i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
-    // 适当增大 DMA 深度，降低 SD 读取抖动导致的 I2S 断粮概率
     tx_chan_cfg.dma_desc_num = 12;
     tx_chan_cfg.dma_frame_num = 512;
     ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &tx_chan, NULL));
@@ -78,9 +77,8 @@ void i2s_init_std_simplex(void) {
 
 static void pcm_reader_task(void *args) {
     pcm_play_ctx_t *ctx = (pcm_play_ctx_t *)args;
-    uint8_t raw[PCM_RAW_CHUNK_BYTES];
 
-    // 读取源 PCM 文件（8-bit unsigned）
+    // 读取源 PCM 文件（16-bit signed）
     FILE *fp = fopen(ctx->path, "rb");
     if (fp == NULL) {
         printf("PCM Reader: open %s failed\n", ctx->path);
@@ -101,8 +99,8 @@ static void pcm_reader_task(void *args) {
             continue;
         }
 
-        // 读取一块原始 8-bit PCM
-        size_t samples = fread(raw, 1, PCM_RAW_CHUNK_BYTES, fp);
+        // 读取一块 16-bit signed PCM
+        size_t samples = fread(chunk->data, sizeof(int16_t), PCM_RAW_CHUNK_BYTES, fp);
         if (samples == 0) {
             // 约定 samples == 0 作为播放结束标记
             chunk->samples = 0;
@@ -110,10 +108,6 @@ static void pcm_reader_task(void *args) {
             break;
         }
 
-        // 8-bit unsigned PCM -> 16-bit signed PCM
-        for (size_t i = 0; i < samples; i++) {
-            chunk->data[i] = (int16_t)(raw[i] - 128) << 3;
-        }
         chunk->samples = samples;
         // 投递到就绪队列，供 writer 发送到 I2S
         xQueueSend(ctx->ready_queue, &chunk, portMAX_DELAY);

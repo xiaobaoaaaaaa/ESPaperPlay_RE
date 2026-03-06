@@ -50,7 +50,7 @@ void lvgl_init_task(void *param) {
 }
 
 void audio_test_task(void *param) {
-    music_play_file_from_sdcard("/sdcard/test.wav");
+    music_play_file_from_sdcard("/sdcard/test.mp3");
     vTaskDelete(NULL);
 }
 
@@ -75,6 +75,7 @@ void app_main(void) {
     }
     if (sdcard_mounted) {
         ESP_LOGI(TAG, "SD 卡已挂载");
+        sdcard_list_root();
     }
 
     // 初始化配置管理器
@@ -87,7 +88,6 @@ void app_main(void) {
     // 初始化音频
     i2s_init_std_simplex();
     xTaskCreate(audio_test_task, "audio_test_task", 4096, NULL, 5, NULL);
-    return;
 
     s_init_event_group = xEventGroupCreate();
     if (s_init_event_group == NULL) {

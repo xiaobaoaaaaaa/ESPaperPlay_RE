@@ -13,7 +13,7 @@
 #define EPD_PANEL_SPI_MODE 0
 // e-Paper SPI
 #define PIN_NUM_MOSI 11
-#define PIN_NUM_SCLK 12
+#define PIN_NUM_SCLK 16
 // e-Paper GPIO
 #define PIN_NUM_EPD_DC 9
 #define PIN_NUM_EPD_RST 18
