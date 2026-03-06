@@ -23,8 +23,8 @@ set(EPAPER_SRCS
     "src/hardware/display/epaper.c"
 )
 
-set(AUDIO_SRCS
-    "src/hardware/audio/audio.c"
+set(I2S_SRCS
+    "src/hardware/i2s/i2s.c"
 )
 
 set(SD_CARD_SRCS
@@ -48,7 +48,7 @@ file(GLOB UI_ACTION_FILES "src/ui/actions/*.c")
 set(HARDWARE_SRCS
     ${TP_SRCS}
     ${EPAPER_SRCS}
-    ${AUDIO_SRCS}
+    ${I2S_SRCS}
     ${SD_CARD_SRCS}
 )
 
@@ -60,6 +60,7 @@ set(SERVICES_SRCS
     "src/services/weather.c"
     "src/services/decompress.c"
     "src/services/solar_term.c"
+    "src/services/audio_player.c"
 )
 
 set(ALL_SRCS 

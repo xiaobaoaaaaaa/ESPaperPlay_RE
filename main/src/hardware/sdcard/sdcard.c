@@ -74,7 +74,7 @@ esp_err_t sdcard_init(void) {
     if (ret != ESP_OK) {
         return ret;
     }
-    ret = sdspi_host_set_card_clk(host.slot, 20000); // 20MHz
+    ret = sdspi_host_set_card_clk(host.slot, 15000); // 20MHz
     if (ret != ESP_OK) {
         return ret;
     }

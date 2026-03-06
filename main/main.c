@@ -6,13 +6,14 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "audio.h"
+#include "audio_player.h"
 #include "config_manager.h"
 #include "date_update.h"
 #include "epaper.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/task.h"
+#include "i2s.h"
 #include "ip_location.h"
 #include "lvgl_init.h"
 #include "sdcard.h"
@@ -48,6 +49,11 @@ void lvgl_init_task(void *param) {
     vTaskDelete(NULL);
 }
 
+void audio_test_task(void *param) {
+    music_play_file_from_sdcard("/sdcard/test.wav");
+    vTaskDelete(NULL);
+}
+
 void app_main(void) {
     // 初始化 FATFS
     esp_vfs_fat_mount_config_t mount_config = {.format_if_mount_failed = true,
@@ -66,7 +72,6 @@ void app_main(void) {
     err = sdcard_init();
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "sdcard_init failed: %s", esp_err_to_name(err));
-        return;
     }
     if (sdcard_mounted) {
         ESP_LOGI(TAG, "SD 卡已挂载");
@@ -81,6 +86,8 @@ void app_main(void) {
 
     // 初始化音频
     i2s_init_std_simplex();
+    xTaskCreate(audio_test_task, "audio_test_task", 4096, NULL, 5, NULL);
+    return;
 
     s_init_event_group = xEventGroupCreate();
     if (s_init_event_group == NULL) {
